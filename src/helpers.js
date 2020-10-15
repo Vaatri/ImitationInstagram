@@ -1,3 +1,6 @@
+import API from "./api.js";
+
+const api = new API();
 /* returns an empty array of size max */
 export const range = (max) => Array(max).fill(null);
 
@@ -34,15 +37,184 @@ export function createElement(tag, data, options = {}) {
  * @param   {object}        post 
  * @returns {HTMLElement}
  */
-export function createPostTile(post) {
+export function createPostTile(post, post_index) {
     const section = createElement('section', null, { class: 'post' });
-
+    
+    //add author
     section.appendChild(createElement('h2', post.meta.author, { class: 'post-title' }));
+    
+    //create div for the content
+    const content = createElement('div', null, {class: "content-container"});
+    
+    //add image
+    content.appendChild(createPostImage(post));
+    
+    //add post content
+    content.appendChild(createPostInfo(post));
 
-    section.appendChild(createElement('img', null, 
-        { src: '/images/'+post.src, alt: post.meta.description_text, class: 'post-image' }));
-
+    section.appendChild(content);
+    
     return section;
+}
+
+const create_like_button = (id) => {
+    const like_button_container = createElement('div', null, {});
+    const like_button = createElement('button', 'Like this', {class: 'like-button'});
+    like_button_container.appendChild(like_button);
+    
+    like_button.addEventListener('click', () => {
+        const user_token = `Token ${localStorage.getItem('user_token')}`;    
+        api.get_request(`post/like/?id=${id}`, {method:'PUT', headers: { 
+                                                                            'Content-Type': 'application/json', 
+                                                                            'Authorization':  user_token }
+                                                                            })
+        .then(data => {
+            console.log(data);
+        })
+    });
+    
+    return like_button_container;
+}
+
+
+/**
+ * Create an image from the given post and return an image 
+ * @param {*} post 
+ */
+export function createPostImage(post){
+
+    //add image
+    const img = createElement('img', null, 
+        { src: "data:image/jpeg;base64,"+post.src, alt: post.meta.description_text, class: 'post-image' });
+    
+    
+    return img;
+
+}
+/**
+ * Create the post information, like, comments, description and return a div with all of it
+ * @param {*} post 
+ */
+export function createPostInfo(post) {
+    const post_data_container = createElement('div', null, {class: 'post-meta-container'});
+    //create container for post meta data
+    const post_data = createElement('div', null, {class: 'post-meta-data'})
+    post_data_container.appendChild(post_data);
+    
+    //add a like button to the post
+    post_data_container.appendChild(create_like_button(post.id));
+    
+    //add author description
+    const author_text = createElement('b', `${post.meta.author}: `, {class: 'author-desc'});
+    post_data.appendChild(author_text);
+    
+    post_data.appendChild(createElement('span', post.meta.description_text, {class: 'desc-text'}));
+    
+    //add likes, comments and date
+    const comments = createElement('p', `There are ${post.comments.length} comments`, {class : 'comments'});
+    const likes = createElement('p', `${post.meta.likes.length} people like this`, {class : 'likes'});
+    setup_comment_popup(comments, post);
+    setup_likes_popup(likes, post);
+    
+    post_data.appendChild(likes);
+    post_data.appendChild(comments);
+    post_data.appendChild(createElement('p', `Published: ${convert_time(post.meta.published)}`, {class: "published"}));
+    
+    return post_data_container;
+}
+
+const popup = document.getElementById('popup');
+const popup_content = document.getElementById('popup-content');
+
+const create_popup_exit = () => {
+
+    let exit_button = createElement('button', 'X', {id:'popup-exit'});
+        exit_button.addEventListener('click', (event) => {
+            popup.style.display = 'none';
+            while(popup_content.hasChildNodes()){
+                    popup_content.removeChild(popup_content.lastChild);
+            }
+        });
+    return exit_button;
+}
+
+const create_popup_content = (header, post) => {
+        //add the image
+    popup_content.appendChild(createPostImage(post));
+    //create a div with the header and exit button
+    let popup_data_container = createElement('div', null, {class: 'popup-data-container'});
+    popup_content.appendChild(popup_data_container);
+    
+    let header_exit_div = createElement('div',null, {class: 'popup-header'});
+    header_exit_div.appendChild(createElement('h2', header, {class: 'popup-header-text'}));        
+    header_exit_div.appendChild(create_popup_exit());
+    popup_data_container.appendChild(header_exit_div);
+    
+    return popup_data_container;
+}
+
+export function setup_comment_popup(comment, post){
+    
+    comment.addEventListener('click', () => {
+        let popup_data_container = create_popup_content('Comments', post);
+        //add all the comments
+        const comments_list = createElement('ul', null, {id: 'comments-list'});
+                post.comments.forEach((comment) => {
+            comments_list.appendChild(createElement('li', `${comment.author}: ${comment.comment}`, {class:'popup-list-item'}));
+        });
+        popup_data_container.appendChild(comments_list);
+        popup.style.display = 'block';
+        //create the comments list
+    
+    });
+    
+
+}
+
+
+function setup_likes_popup(likes, post) {
+
+    //setup the eventlistener
+    likes.addEventListener('click', (event) =>{
+        let popup_data_container = create_popup_content('Likes', post);
+        const likes_list = createElement('ul', null, {id: 'likes-list'});
+        popup_data_container.appendChild(likes_list);
+        const token = `Token ${localStorage.getItem('user_token')}`;
+        
+        // const like_list = [];
+        
+        post.meta.likes.forEach((user_id) => {
+            api.get_user(user_id, token)
+            .then(data => {
+                likes_list.appendChild(createElement('li', `${data.username} likes this.`), {class:'popup-list-item'});
+            });    
+        })
+        
+        popup.style.display = 'block';
+    });
+    
+
+}
+
+function convert_time(published_time) {
+    
+    var d=new Date(); 
+    var now_time = Math.floor(d.getTime()/1000);
+    var seconds = now_time-published_time;
+
+    if (seconds > 24*3600) {
+        const days = Math.floor(seconds/(24*3600));
+       return `Posted ${days} ago`;
+    }
+
+    if (seconds > 3600) {
+        const hours = seconds/3600
+       return `Posted ${hours} ago`;
+    }
+
+    if (seconds > 60) {
+       return Math.floor(seconds/60) + " minutes ago";
+    }
 }
 
 // Given an input element of type=file, grab the data uploaded for use

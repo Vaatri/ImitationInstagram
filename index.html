@@ -7,22 +7,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- You can add your styles and scripts here -->
     <link rel="stylesheet" type="text/css" media="screen" href="styles/provided.css" />
+    <link rel="stylesheet" type="text/css" href="styles/post.css" />
+    <link rel="stylesheet" type="text/css" href="styles/modal.css" />
     <script type="module" src="src/helpers.js"></script>
     <script type="module" src="src/api.js"></script>
 </head>
 <body>
     <!-- This is an example app structure, you can modify this as much as you choose --> 
-    <header class="banner">
+    <header id="banner">
         <h1>Quickpic</h1>
-        <ul class="nav">
-            <li class="nav-item">Item</li>
-            <li class="nav-item">Item</li>
-        </ul>
     </header>
-    <main role="main">
+    <main role="main" id="page">
         <!-- app goes here --> 
+        <div id="popup">
+            <div id="popup-content">
+            </div>
+        </div>
+        <div id="form-container">
+            <h1 id="form-header">LOGIN</h1>
+            <hr id="header-break">
+            <form id="form" name="login_register_form">
+                <div id="input-container">
+                    <input placeholder="Username" type="text" name="username">
+                    <input placeholder="Password" type="password" name="pwd">
+                    <div id="buttons-container">
+                        <input type="submit" name="primary" value="Submit">
+                        <input type="button" name="secondary" value="Register">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div id="feed">
+        </div>
     </main>
-    <footer>
+    <footer id="footer">
         <p>&copy; Quickpic</p>
     </footer>
     <script type="module" src="src/main.js"></script>

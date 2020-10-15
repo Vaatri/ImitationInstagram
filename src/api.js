@@ -1,5 +1,5 @@
 // change this when you integrate with the real API, or when u start using the dev server
-const API_URL = 'http://localhost:8080/data'
+const API_URL = 'http://localhost:5000'
 
 const getJSON = (path, options) => 
     fetch(path, options)
@@ -20,7 +20,23 @@ export default class API {
         this.url = url;
     } 
 
-    makeAPIRequest(path) {
-        return getJSON(`${this.url}/${path}`);
+    makeAPIRequest(path, options) {
+        return getJSON(`${this.url}/${path}`, options);
     }
+    
+    get_request(path, options) {
+        const response = this.makeAPIRequest(path, options);
+        return response;
+    }
+    
+    get_user(id, token) {
+        return this.makeAPIRequest(`user/?id=${id}`, { method: 'GET', headers: {'Authorization': token}});
+    }
+    
+    // async get_feed(path,options) {
+    //     const response = await getJSON(path, options);
+    //     return response;
+    // }
+    
+    
 }

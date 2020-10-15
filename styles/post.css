@@ -1,0 +1,36 @@
+.content-container {
+    display: flex;
+    flex-direction: row;
+    /* margin: 0 20vw; */
+    border-top: 1px solid rgb(199, 199, 199);
+}
+
+.post-meta-container {
+    padding: 2vh 2vw 0 2vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.post-title {
+    padding-left: 2vw;
+}
+
+.post {
+    max-width: 70%;
+    min-width: 50%;
+    margin: 3vh 30vw;
+    background-color: white;
+    border-color: rgb(199, 199, 199);
+}
+
+.like-button {
+    margin-bottom: 10px;
+}
+
+.post-title:hover {
+    /* background-color: rgb(133, 133, 133); */
+    color: rgb(135, 127, 165);
+    text-decoration: underline;
+    cursor: pointer;
+}

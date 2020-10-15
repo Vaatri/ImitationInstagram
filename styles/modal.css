@@ -1,0 +1,55 @@
+#popup {
+    display:none;
+    position: fixed;
+    z-index: 1;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(0,0,0,0.8);
+}
+
+#picture-container {
+    vertical-align: bottom;
+}
+
+#popup-content {
+    background-color: white;
+    display: flex;
+    flex-direction: row;
+    margin: 25vh 30vw;
+}
+
+.popup-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.popup-data-container {
+    flex: 1;
+}
+
+.post-image {
+    max-width: 30vw;
+    object-fit: cover;
+}
+
+.comments:hover, .likes:hover {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.popup-header-text {
+    margin-left: 1vw;
+}
+
+#popup-exit {
+    background-color: rgba(0,0,0,0);
+    border-style: none;
+    margin: 1vw;
+    height: 40%;
+}
+
+#popup-exit:active, #popup-exit:hover {
+    background-color: rgb(226, 226, 226);
+}
