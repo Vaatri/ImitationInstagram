@@ -8,21 +8,17 @@ const getJSON = (path, options) =>
 
 /**
  * This is a sample class API which you may base your code on.
- * You don't have to do this as a class.
+ * You may use this as a launch pad but do not have to.
  */
 export default class API {
-
-    /**
-     * Defaults to teh API URL
-     * @param {string} url 
-     */
-    constructor(url = API_URL) {
+    /** @param {String} url */
+    constructor(url) {
         this.url = url;
     } 
 
     makeAPIRequest(path, options) {
         return getJSON(`${this.url}/${path}`, options);
-    }
+    }    
     
     get_request(path, options) {
         const response = this.makeAPIRequest(path, options);

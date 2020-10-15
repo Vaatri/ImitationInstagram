@@ -1,8 +1,11 @@
+
 // importing named exports we use brackets
 import { createElement, createPostTile, uploadImage } from './helpers.js';
 
 // when importing 'default' exports, use below syntax
 import API from './api.js';
+// A helper you may want to use when uploading new images to the server.
+import { fileToDataUrl } from './helpers.js';
 
 // const api  = new API();
 
@@ -220,3 +223,6 @@ const setup_comments = () => {
 
 
 
+// Example usage of makeAPIRequest method.
+api.makeAPIRequest('dummy/user')
+    .then(r => console.log(r));
