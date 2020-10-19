@@ -16,7 +16,7 @@ html, body {
     justify-content: space-between;
     align-items: center;
     padding: 10px 10px 10px 5%;
-    min-height: 60px;
+    min-height: 30px;
     border-bottom: 1px solid rgba(0,0,0,.0975);
     position: fixed;
     width: 100%;
@@ -134,8 +134,14 @@ section {
 }
 
 
+.link-to-profile {
+    font-weight: bold;
+}
 
-
+.link-to-profile:hover{
+    cursor: pointer;
+    text-decoration: underline;
+}
 /* ::-webkit-scrollbar {
     width: 3%;
 }

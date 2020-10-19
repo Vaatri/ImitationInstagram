@@ -15,7 +15,7 @@
     background-color: white;
     display: flex;
     flex-direction: row;
-    margin: 25vh 30vw;
+    margin: 25vh 25vw;
 }
 
 .popup-header {
@@ -23,6 +23,7 @@
     flex-direction: row;
     justify-content: space-between;
     width: 100%;
+    border-bottom: 1px solid black;
 }
 
 .popup-data-container {
@@ -52,4 +53,18 @@
 
 #popup-exit:active, #popup-exit:hover {
     background-color: rgb(226, 226, 226);
+}
+
+.popup-list-item, .popup-list-item {
+    padding-right: 2em;
+    list-style-type: none;
+    margin-bottom: 2vh;
+}
+#comments-list, #likes-list {
+    padding-left: 1vw;
+}
+
+
+.comment-text {
+    font-weight: normal;
 }

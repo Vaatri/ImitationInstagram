@@ -12,7 +12,7 @@ const getJSON = (path, options) =>
  */
 export default class API {
     /** @param {String} url */
-    constructor(url) {
+    constructor(url = API_URL) {
         this.url = url;
     } 
 
@@ -25,8 +25,16 @@ export default class API {
         return response;
     }
     
-    get_user(id, token) {
+    get_user(token) {
+        return this.makeAPIRequest(`user/`, { method: 'PUT', headers: {'Authorization': `Token ${token}`}});
+    }
+    
+    get_user_from_id(id, token) {
         return this.makeAPIRequest(`user/?id=${id}`, { method: 'GET', headers: {'Authorization': token}});
+    }
+    
+    get_user_from_username(username, token) {
+        return this.makeAPIRequest(`user/?username=${username}`, { method: 'GET', headers: {'Authorization': token}});
     }
     
     // async get_feed(path,options) {

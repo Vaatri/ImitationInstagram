@@ -1,5 +1,5 @@
-<<<<<<< HEAD
 import API from "./api.js";
+import { link_profile } from "./profile.js";
 
 const api = new API();
 /* returns an empty array of size max */
@@ -14,8 +14,7 @@ const randomHex = () => randomInteger(256).toString(16);
 /* returns a randomColor */
 export const randomColor = () => '#'+range(3).map(randomHex).join('');
 
-=======
->>>>>>> fbb5e6a1ad2674d60fd811c4657fe955ed33dd11
+
 /**
  * Given a js file object representing a jpg or png image, such as one taken
  * from a html file input element, return a promise which resolves to the file
@@ -31,7 +30,31 @@ export const randomColor = () => '#'+range(3).map(randomHex).join('');
  * @param {File} file The file to be read.
  * @return {Promise<string>} Promise which resolves to the file as a data url.
  */
-<<<<<<< HEAD
+export function fileToDataUrl(file) {
+    const validFileTypes = [ 'image/jpeg', 'image/png', 'image/jpg' ]
+    const valid = validFileTypes.find(type => type === file.type);
+    // Bad data, let's walk away.
+    if (!valid) {
+        throw Error('provided file is not a png, jpg or jpeg image.');
+    }
+    
+    const reader = new FileReader();
+    const dataUrlPromise = new Promise((resolve,reject) => {
+        reader.onerror = reject;
+        reader.onload = () => resolve(reader.result);
+    });
+    reader.readAsDataURL(file);
+    return dataUrlPromise;
+}
+
+
+/**
+ * You don't have to use this but it may or may not simplify element creation
+ * 
+ * @param {string}  tag     The HTML element desired
+ * @param {any}     data    Any textContent, data associated with the element
+ * @param {object}  options Any further HTML attributes specified
+ */
 export function createElement(tag, data, options = {}) {
     const el = document.createElement(tag);
     el.textContent = data;
@@ -49,11 +72,17 @@ export function createElement(tag, data, options = {}) {
  * @param   {object}        post 
  * @returns {HTMLElement}
  */
-export function createPostTile(post, post_index) {
+export function createPostTile(post) {
     const section = createElement('section', null, { class: 'post' });
     
     //add author
-    section.appendChild(createElement('h2', post.meta.author, { class: 'post-title' }));
+    
+    const post_author = createElement('h2', post.meta.author, { class: 'post-title' });
+    post_author.addEventListener('click', () => {
+        link_profile(post.meta.author);
+    });
+
+    section.appendChild(post_author);
     
     //create div for the content
     const content = createElement('div', null, {class: "content-container"});
@@ -117,10 +146,12 @@ export function createPostInfo(post) {
     post_data_container.appendChild(create_like_button(post.id));
     
     //add author description
-    const author_text = createElement('b', `${post.meta.author}: `, {class: 'author-desc'});
+    const author_text = createElement('b', `${post.meta.author}`, {class: 'author-desc' , class: 'link-to-profile'});
     post_data.appendChild(author_text);
     
-    post_data.appendChild(createElement('span', post.meta.description_text, {class: 'desc-text'}));
+    
+    
+    post_data.appendChild(createElement('span', `: ${post.meta.description_text}`, {class: 'desc-text'}));
     
     //add likes, comments and date
     const comments = createElement('p', `There are ${post.comments.length} comments`, {class : 'comments'});
@@ -151,7 +182,7 @@ const create_popup_exit = () => {
 }
 
 const create_popup_content = (header, post) => {
-        //add the image
+    //add the image
     popup_content.appendChild(createPostImage(post));
     //create a div with the header and exit button
     let popup_data_container = createElement('div', null, {class: 'popup-data-container'});
@@ -171,8 +202,16 @@ export function setup_comment_popup(comment, post){
         let popup_data_container = create_popup_content('Comments', post);
         //add all the comments
         const comments_list = createElement('ul', null, {id: 'comments-list'});
-                post.comments.forEach((comment) => {
-            comments_list.appendChild(createElement('li', `${comment.author}: ${comment.comment}`, {class:'popup-list-item'}));
+        post.comments.forEach((comment) => {
+            const li = createElement('li', '', {class: 'popup-list-item'});
+            const comment_author = createElement('b', `${comment.author}`, {class:'link-to-profile'});
+            comment_author.appendChild(createElement('span',`: ${comment.comment}`,{class:'comment-text'}));
+            comment_author.addEventListener('click', ()=>{
+                link_profile(comment.author);
+            });
+            
+            comments_list.appendChild(li);
+            li.appendChild(comment_author);
         });
         popup_data_container.appendChild(comments_list);
         popup.style.display = 'block';
@@ -193,20 +232,45 @@ function setup_likes_popup(likes, post) {
         popup_data_container.appendChild(likes_list);
         const token = `Token ${localStorage.getItem('user_token')}`;
         
-        // const like_list = [];
+        let user_list = [];
         
-        post.meta.likes.forEach((user_id) => {
-            api.get_user(user_id, token)
-            .then(data => {
-                likes_list.appendChild(createElement('li', `${data.username} likes this.`), {class:'popup-list-item'});
-            });    
-        })
+        const allPromises = Array.from(Array(post.meta.likes.length)).map((_, i) => {       
+            return api.get_user_from_id(post.meta.likes[i], token)
+            .then(user => {
+                user_list.push(user.username); 
+            });
+        });
+        console.log(allPromises);
         
+        Promise.all(allPromises)
+        .then(() => {
+            for(let username of user_list){
+                const li = createElement('li', '', {class: 'popup-list-item'});
+                const comment_author = createElement('b', username, {class:'link-to-profile'});
+                li.appendChild(comment_author);
+                li.appendChild(document.createElement('span',` likes this.`,{}));
+                likes_list.appendChild(li);
+            }
+        });
+        
+    //     post.meta.likes.forEach((user_id) => {
+    //         api.get_user_from_id(user_id, token)
+    //         .then(data => {
+    //             const li = createElement('li', '', {class: 'popup-list-item'});
+    //             const comment_author = createElement('b', `${data.username}`, {class:'link-to-profile'});
+    //             li.appendChild(comment_author);
+    //             comment_author.addEventListener('click', () => {
+    //                 link_profile(data.username);
+    //             });
+    //             comment_author.appendChild(createElement('span',` likes this.`,{class: 'comment-text'}));
+    //             likes_list.appendChild(li);
+    //         });    
+    //     })      
         popup.style.display = 'block';
     });
     
-
 }
+
 
 function convert_time(published_time) {
     
@@ -233,21 +297,37 @@ function convert_time(published_time) {
 export function uploadImage(event) {
     const [ file ] = event.target.files;
 
-=======
-export function fileToDataUrl(file) {
->>>>>>> fbb5e6a1ad2674d60fd811c4657fe955ed33dd11
     const validFileTypes = [ 'image/jpeg', 'image/png', 'image/jpg' ]
     const valid = validFileTypes.find(type => type === file.type);
-    // Bad data, let's walk away.
-    if (!valid) {
-        throw Error('provided file is not a png, jpg or jpeg image.');
-    }
+
+    // bad data, let's walk away
+    if (!valid)
+        return false;
     
+    // if we get here we have a valid image
     const reader = new FileReader();
-    const dataUrlPromise = new Promise((resolve,reject) => {
-        reader.onerror = reject;
-        reader.onload = () => resolve(reader.result);
-    });
+    
+    reader.onload = (e) => {
+        // do something with the data result
+        const dataURL = e.target.result;
+        const image = createElement('img', null, { src: dataURL });
+        document.body.appendChild(image);
+    };
+
+    // this returns a base64 image
     reader.readAsDataURL(file);
-    return dataUrlPromise;
+}
+
+/* 
+    Reminder about localStorage
+    window.localStorage.setItem('AUTH_KEY', someKey);
+    window.localStorage.getItem('AUTH_KEY');
+    localStorage.clear()
+*/
+export function checkStore(key) {
+    if (window.localStorage)
+        return window.localStorage.getItem(key)
+    else
+        return null
+
 }

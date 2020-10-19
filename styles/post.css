@@ -28,6 +28,10 @@
     margin-bottom: 10px;
 }
 
+.comment-text {
+    font-weight: normal;
+}
+
 .post-title:hover {
     /* background-color: rgb(133, 133, 133); */
     color: rgb(135, 127, 165);

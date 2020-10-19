@@ -1,7 +1,7 @@
 
 // importing named exports we use brackets
-import { createElement, createPostTile, uploadImage } from './helpers.js';
-
+import { createElement, createPostTile, createPostImage, uploadImage } from './helpers.js';
+import {link_profile} from './profile.js';
 // when importing 'default' exports, use below syntax
 import API from './api.js';
 // A helper you may want to use when uploading new images to the server.
@@ -99,6 +99,7 @@ form.addEventListener('submit', (event) => {
             //otherwise save data in localstorage
             } else {
                 const token = response.token;
+                console.log(token);
                 localStorage.setItem('user_token', token);
                 display_feed(token);
             }
@@ -141,16 +142,42 @@ const display_feed = (token) => {
     .then(data => {
         console.log(data);
         const posts = data.posts;
-        posts.reduce((parent, post, post_index) => {
+        posts.reduce((parent, post) => {
+                    const post_content = createPostTile(post)
                     
-                    // const post_template = createPostTile(post, post_index);
+                    // const section = createElement('section', null, { class: 'post' });
+                    // //add author      
+                    // const post_author = createElement('h2', post.meta.author, { class: 'post-title' });  
+                    // section.appendChild(post_author);
+                    // //create div for the content
+                    // const content = createElement('div', null, {class: "content-container"});
+                    // //add image
+                    // content.appendChild(createPostImage(post));
+                    // //add post content
+                    // content.appendChild(createPostInfo(post));
+                    // section.appendChild(content);   
+                    parent.appendChild(post_content);
                     
-                    parent.appendChild(createPostTile(post, post_index));
                     return parent;
         }, feed_dom)
     })
+    .then(() => {
+        link_profiles();
+    });
+    
     
 }
+
+const link_profiles = () => {
+    const profile_links = document.querySelectorAll('.link-to-profile');
+    // console.log(profile_links);
+    profile_links.forEach((element) => {
+        element.addEventListener('click', () => {
+            link_profile(element.textContent);
+        });
+    })
+}
+
 
 const create_pagination = (post) => {
 
@@ -202,27 +229,4 @@ login_form.elements.secondary.addEventListener('click', (event) => {
 
 });
 
-// const setup_posts = () => {
 
-
-
-// }
-
-const setup_comments = () => {
-    const modal = document.getElementById()
-    const comments = document.querySelectorAll('.comments');
-    comments.forEach((comment) => {
-        comment.addEventListener('click', (e) => {
-            
-            
-            modal.style.display = 'block';
-        });
-    });
-
-}
-
-
-
-// Example usage of makeAPIRequest method.
-api.makeAPIRequest('dummy/user')
-    .then(r => console.log(r));
