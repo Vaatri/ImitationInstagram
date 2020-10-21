@@ -17,6 +17,7 @@ html, body {
     align-items: center;
     padding: 10px 10px 10px 5%;
     min-height: 30px;
+    /* height: 40px; */
     border-bottom: 1px solid rgba(0,0,0,.0975);
     position: fixed;
     width: 100%;
@@ -142,6 +143,22 @@ section {
     cursor: pointer;
     text-decoration: underline;
 }
+
+.button-template {
+    border-radius: 1em;
+    border-style: none;
+    padding: 0.5em 1.5em;
+    margin-bottom: 10%;
+    background-color: rgb(197, 197, 197);
+}
+
+.button-template:hover {
+    font-weight: bold;
+    color: white;
+    background: linear-gradient(90deg, rgba(171,167,241,1) 0%, rgba(183,183,233,1) 30%, rgba(205,234,240,1) 100%);
+}
+
+
 /* ::-webkit-scrollbar {
     width: 3%;
 }

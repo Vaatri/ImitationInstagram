@@ -25,8 +25,8 @@ export default class API {
         return response;
     }
     
-    get_user(token) {
-        return this.makeAPIRequest(`user/`, { method: 'PUT', headers: {'Authorization': `Token ${token}`}});
+    get_user(token, options) {
+        return this.makeAPIRequest(`user/`, options);
     }
     
     get_user_from_id(id, token) {

@@ -100,7 +100,7 @@ export function createPostTile(post) {
 
 const create_like_button = (id) => {
     const like_button_container = createElement('div', null, {});
-    const like_button = createElement('button', 'Like this', {class: 'like-button'});
+    const like_button = createElement('button', 'Like this', {class: 'like-button', class: 'button-template'});
     like_button_container.appendChild(like_button);
     
     like_button.addEventListener('click', () => {
@@ -244,11 +244,15 @@ function setup_likes_popup(likes, post) {
         
         Promise.all(allPromises)
         .then(() => {
+            console.log(user_list);
             for(let username of user_list){
                 const li = createElement('li', '', {class: 'popup-list-item'});
                 const comment_author = createElement('b', username, {class:'link-to-profile'});
+                comment_author.addEventListener('click', ()=>{
+                    link_profile(username);
+                });
                 li.appendChild(comment_author);
-                li.appendChild(document.createElement('span',` likes this.`,{}));
+                li.appendChild(createElement('span',` likes this.`,{class: 'comment-text'}));
                 likes_list.appendChild(li);
             }
         });
@@ -329,5 +333,13 @@ export function checkStore(key) {
         return window.localStorage.getItem(key)
     else
         return null
+}
 
+export function set_disabled_button(button, text) {
+    // button.setAttribute("disabled", true);
+    button.textContent = text;
+    button.style.background = 'linear-gradient(90deg, rgba(171,167,241,1) 0%, rgba(183,183,233,1) 30%, rgba(205,234,240,1) 100%)';
+    button.style.color = 'white';
+    button.style.fontWeight = 'bold';
+    
 }

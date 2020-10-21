@@ -1,5 +1,5 @@
 import API from './api.js';
-import { createElement, createPostTile } from './helpers.js';
+import { createElement, createPostTile, set_disabled_button } from './helpers.js';
 
 const api = new API();
 
@@ -39,7 +39,9 @@ const clear_profile_page = () => {
     if(document.getElementById('profile-username').textContent !== ''){
         document.getElementById('followers').remove();
         document.getElementById('following').remove();
-        document.getElementById('prof-info').remove();
+        let profile_info = document.querySelectorAll('.prof-info');
+        profile_info[0].remove();
+        profile_info[1].remove();
     }
     
     while(posts.hasChildNodes()){
@@ -60,7 +62,8 @@ const set_profile_tags = (info) => {
     follower_container.appendChild(followers_elem);
     follower_container.appendChild(following_elem);
     //add user profile info
-    profile_info.appendChild(createElement('span', `${info.name}, ${info.email}`, {id: 'prof-info'}));
+    profile_info.appendChild(createElement('span', `${info.name}, `, {class: 'prof-info'}));
+    profile_info.appendChild(createElement('span', `${info.email}`, {class: 'prof-info'}));
 }
 
 const display_profile_posts = (profile) => {
@@ -86,36 +89,37 @@ const display_profile_posts = (profile) => {
 }
 
 const follow_handler = () => {
-    console.log("hello");
     const follow_button = document.getElementById('follow-button');
     const id = Number(id_number.innerText.slice(3));
-    console.log(typeof(id));
-    
+    // follow_button.setAttribute("disabled", false);
     const options = {
-        Method: 'PUT',
-        headers: {'Authorization': `Token ${localStorage.getItem('user_token')}`}
+        method: 'GET',
+        headers: {'Content-Type': 'application/json', 'Authorization': `Token ${localStorage.getItem('user_token')}`}
     };
     
-    api.get_user(localStorage.getItem('user_token'))
+    api.get_user(localStorage.getItem('user_token'), options)
     .then(data => {
         const following_ids = data.following;
         follow_button.innerText ="Follow";
         let following_request = "follow";
-        // console.log(following_ids.includes(id));
         if(following_ids.includes(id)) {
-            console.log("ok");
             follow_button.innerText = "Unfollow";
             following_request = "unfollow";
         }
+        options['method'] = 'PUT';
         follow_button.addEventListener('click', () => {
             api.makeAPIRequest(`user/${following_request}?username=${profile_username.innerText}`, options)
             .then(data => {
-                console.log(data);
-            })
-        })
-    })
+                if(!data['message']) {
+                    set_disabled_button(follow_button, `${following_request}ed!`);
+                } else {
+                    follow_button.innerText = "Can't Follow yourself bro";
+                }
+            });
+        });
 
-}
+    });
+}    
 
 
 const is_following = () => {

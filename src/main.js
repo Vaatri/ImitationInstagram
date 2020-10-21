@@ -89,8 +89,6 @@ form.addEventListener('submit', (event) => {
         path = 'auth/signup';
     }
     
-    
-    
         api.makeAPIRequest(path, options)
         .then(response => {
             if(response["message"]) {
@@ -126,6 +124,7 @@ const display_feed = (token) => {
     
     header.style.background = background_gradient;
     header.style.borderBottom = '1px solid rgb(199, 199, 199)';
+    header.style.height = '50px';
     footer.style.background = background_gradient;
     
     form_page.style.display = 'none';
@@ -143,19 +142,7 @@ const display_feed = (token) => {
         console.log(data);
         const posts = data.posts;
         posts.reduce((parent, post) => {
-                    const post_content = createPostTile(post)
-                    
-                    // const section = createElement('section', null, { class: 'post' });
-                    // //add author      
-                    // const post_author = createElement('h2', post.meta.author, { class: 'post-title' });  
-                    // section.appendChild(post_author);
-                    // //create div for the content
-                    // const content = createElement('div', null, {class: "content-container"});
-                    // //add image
-                    // content.appendChild(createPostImage(post));
-                    // //add post content
-                    // content.appendChild(createPostInfo(post));
-                    // section.appendChild(content);   
+                    const post_content = createPostTile(post)  
                     parent.appendChild(post_content);
                     
                     return parent;

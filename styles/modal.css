@@ -58,8 +58,11 @@
 .popup-list-item, .popup-list-item {
     padding-right: 2em;
     list-style-type: none;
-    margin-bottom: 2vh;
+    margin-bottom: 1vh;
+    font-size: 2vh;
 }
+
+
 #comments-list, #likes-list {
     padding-left: 1vw;
 }
@@ -67,4 +70,8 @@
 
 .comment-text {
     font-weight: normal;
+}
+
+.comment-text:hover {
+    text-decoration: none;
 }
