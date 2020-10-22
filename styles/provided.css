@@ -9,19 +9,43 @@ html, body {
     font-family: 'Courier New';
 }
 
+li {
+    list-style-type: none;
+}
+
+
 #banner {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 10px 10px 5%;
+    padding: 10px 15% 10px 5%;
     min-height: 30px;
     /* height: 40px; */
     border-bottom: 1px solid rgba(0,0,0,.0975);
     position: fixed;
-    width: 100%;
-    
+    width: 94%;
+}
+
+.nav {
+    list-style-type: none;
+    padding: 0;
+}
+
+.nav-item {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    margin: auto;
+    padding: 5px;
+    display: inline;
+    list-style-type: none;
+    border-radius: 1em;
+    background-color: white;
+    font-size: 0.8em;
+}
+
+#nav-profile {
+    display: none;
 }
 
 #footer {
@@ -47,6 +71,12 @@ html, body {
     padding: 5px;
     display: inline;
     list-style-type: none;
+}
+.nav-item:hover {
+    background-color: rgb(94, 94, 94);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
 }
 
 /* Add your styles here */
@@ -144,12 +174,13 @@ section {
     text-decoration: underline;
 }
 
-.button-template {
+.button-template , .nav-item{
     border-radius: 1em;
     border-style: none;
     padding: 0.5em 1.5em;
     margin-bottom: 10%;
     background-color: rgb(197, 197, 197);
+    font-family: 'Courier New'
 }
 
 .button-template:hover {
@@ -157,6 +188,7 @@ section {
     color: white;
     background: linear-gradient(90deg, rgba(171,167,241,1) 0%, rgba(183,183,233,1) 30%, rgba(205,234,240,1) 100%);
 }
+
 
 
 /* ::-webkit-scrollbar {

@@ -8,10 +8,10 @@
 #profile-info-container {
     display: flex;
     flex-direction: column;
-    margin: 5vh 30vw;
+    margin: 5vh 1vw;
     align-items: center;
-    border: 1px solid rgba(99, 99, 99, 0.75);
     padding: 1em 4em;
+    border: 1px solid rgba(99, 99, 99, 0.75);
     background-color: white;
 }
 
@@ -40,5 +40,26 @@
 #profile-header-container {
     display: flex;
     flex-direction: row;
+    justify-content: center;
+    /* align-items: center; */
+}
 
+
+#profile-following {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(99, 99, 99, 0.75);
+    background-color: white;
+    align-items: center;
+    padding: 0 5%;
+    margin: 5vh 0;
+    overflow: scroll;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    min-width: 30%;
+
+}
+
+#following-list {
+    padding: 0;
 }

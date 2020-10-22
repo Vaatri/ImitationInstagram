@@ -1,43 +1,54 @@
-
 // importing named exports we use brackets
-import { createElement, createPostTile, createPostImage, uploadImage } from './helpers.js';
+import { createElement, createPostTile, createPostImage, uploadImage, display_post_popup } from './helpers.js';
 import {link_profile} from './profile.js';
 // when importing 'default' exports, use below syntax
 import API from './api.js';
 // A helper you may want to use when uploading new images to the server.
 import { fileToDataUrl } from './helpers.js';
 
-// const api  = new API();
-
-// // we can use this single api request multiple times
-// const feed = api.getFeed();
-
-// feed
-// .then(posts => {
-//     posts.reduce((parent, post) => {
-
-//         parent.appendChild(createPostTile(post));
-        
-//         return parent;
-
-//     }, document.getElementById('large-feed'))
-// });
-
-// // Potential example to upload an image
-// const input = document.querySelector('input[type="file"]');
-
-// input.addEventListener('change', uploadImage);
 
 const background_gradient = 'linear-gradient(90deg, rgba(171,167,241,1) 0%, rgba(183,183,233,1) 30%, rgba(205,234,240,1) 100%)';
 
-// begin my code
-const form_page = document.getElementById('form-container');
-const login_form = document.forms.login_register_form;
+//page doms
+const feed_dom = document.getElementById("feed");
 const page = document.getElementById('page');
-const form_header = document.getElementById("form-header");
 const form = document.getElementById('form');
+const form_page = document.getElementById('form-container');
+const header = document.getElementById("banner");
+const footer = document.getElementById("footer");
+
+//nav bar doms
+const logout_button = document.getElementById('logout');
+const create_post = document.getElementById('nav-post')
+
+//misc doms
+const login_form = document.forms.login_register_form;
+const form_header = document.getElementById("form-header");
+const upload_post = document.getElementById('')
 
 const api = new API();
+
+
+logout_button.addEventListener('click', () => {
+    localStorage.clear();
+    feed_dom.style.display = 'none';
+    form_page.style.display = 'flex';
+    document.getElementById('nav-profile').style.display = 'none';
+    while(feed_dom.hasChildNodes()) {
+        feed_dom.removeChild(feed_dom.lastElementChild);
+    }
+    footer.style.backgroundColor = '#e6e6e6';
+    header.style.backgroundColor = '#e6e6e6';
+    
+});
+
+window.onload = () => {
+    const token = localStorage.getItem('user_token');
+    if(token){
+        display_feed(token);
+    }
+}
+
 
 form.addEventListener('submit', (event) => {
     
@@ -89,19 +100,19 @@ form.addEventListener('submit', (event) => {
         path = 'auth/signup';
     }
     
-        api.makeAPIRequest(path, options)
-        .then(response => {
-            if(response["message"]) {
-            
-                alert(response.message);
-            //otherwise save data in localstorage
-            } else {
-                const token = response.token;
-                console.log(token);
-                localStorage.setItem('user_token', token);
-                display_feed(token);
-            }
-        });
+    api.makeAPIRequest(path, options)
+    .then(response => {
+        if(response["message"]) {
+        
+            alert(response.message);
+        //otherwise save data in localstorage
+        } else {
+            const token = response.token;
+            console.log(token);
+            localStorage.setItem('user_token', token);
+            display_feed(token);
+        }
+    });
 
 
 });
@@ -115,19 +126,16 @@ const is_valid_password = (pwd, pwd_confirm) => {
 }
 
 
-const feed_dom = document.getElementById("feed");
-
 const display_feed = (token) => {
 
-    const header = document.getElementById("banner");
-    const footer = document.getElementById("footer");
-    
     header.style.background = background_gradient;
     header.style.borderBottom = '1px solid rgb(199, 199, 199)';
     header.style.height = '50px';
     footer.style.background = background_gradient;
     
     form_page.style.display = 'none';
+
+    document.getElementById('nav-profile').style.display = 'inline';
 
     const options = {
         method: 'GET',  
@@ -214,6 +222,11 @@ login_form.elements.secondary.addEventListener('click', (event) => {
         display_login_form();
     }
 
+});
+
+//add create post functionality
+create_post.addEventListener('click', () => {
+    display_post_popup();
 });
 
 

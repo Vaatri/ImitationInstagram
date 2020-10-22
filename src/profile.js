@@ -1,5 +1,5 @@
 import API from './api.js';
-import { createElement, createPostTile, set_disabled_button } from './helpers.js';
+import { createElement, createPostTile, set_disabled_button, get_token } from './helpers.js';
 
 const api = new API();
 
@@ -9,6 +9,7 @@ const id_number = document.getElementById('id-number');
 //this will be an event listener to clicking usernames on posts
 export function link_profile(username) {
     
+    // localStorage.setItem('prev-page', 'profile');
     
     //clean up the feed
     const feed_dom = document.getElementById("feed");
@@ -18,14 +19,15 @@ export function link_profile(username) {
     const header_banner = document.getElementById('banner');
     header_banner.style.Height = '50px';
     
-    
     //display the page
     document.getElementById('profile-page').style.display = 'flex';
     const token = localStorage.getItem('token');
     //get user info
-    api.get_user_from_username(username, `Token ${localStorage.getItem('user_token')}`)
+    api.get_user_from_username(username, get_token())
     .then(data => {
+        console.log(data);
         set_profile_tags(data);
+        set_following_list(data.following);
         display_profile_posts(data);
         follow_handler();
     });
@@ -75,7 +77,7 @@ const display_profile_posts = (profile) => {
     
     const options = {
         method: 'GET',  
-        headers: { 'Authorization': `Token ${localStorage.getItem('user_token')}`, src: "data:image/jpeg;base64"}
+        headers: { 'Authorization': get_token(), src: "data:image/jpeg;base64"}
     }
     
     user_posts.forEach((post_id) => {
@@ -94,7 +96,7 @@ const follow_handler = () => {
     // follow_button.setAttribute("disabled", false);
     const options = {
         method: 'GET',
-        headers: {'Content-Type': 'application/json', 'Authorization': `Token ${localStorage.getItem('user_token')}`}
+        headers: {'Content-Type': 'application/json', 'Authorization': get_token()}
     };
     
     api.get_user(localStorage.getItem('user_token'), options)
@@ -121,6 +123,31 @@ const follow_handler = () => {
     });
 }    
 
+const set_following_list = (following_list) => {
+
+    const following_dom = document.getElementById('profile-following');
+    let profiles = [];
+    //wait until we recieve all of the usernames who user is following
+    const allPromises = Array.from(Array(following_list.length)).map((_, i) => {
+        return api.get_user_from_id(following_list[i], get_token())
+        .then(user => {
+            profiles.push(user.username);
+        })
+    });
+
+    //once we have a complete list of usernames, create li's and append them to the list.
+    Promise.all(allPromises)
+    .then(() => {
+        profiles.forEach(username => {
+            let following_user = createElement('li', username, {class: 'comment-text'});
+            following_dom.appendChild(following_user);
+            following_user.addEventListener('click', () => {
+                link_profile(username);
+            });
+        });
+    });
+
+}
 
 const is_following = () => {
     //get the id of the current user id

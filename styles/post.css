@@ -20,7 +20,7 @@
 .post {
     max-width: 70%;
     min-width: 50%;
-    margin: 3vh 30vw;
+    margin: 3vh 25vw;
     background-color: white;
     border-color: rgb(199, 199, 199);
 }
@@ -36,4 +36,14 @@
     color: rgb(135, 127, 165);
     text-decoration: underline;
     cursor: pointer;
+}
+
+#post-description {
+    border-style: none;
+    border-bottom: 1px solid rgb(168, 168, 168);
+    resize: none;
+}
+
+#post-buttons .button-template {
+    margin: 1vw;
 }

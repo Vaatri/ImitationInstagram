@@ -16,7 +16,12 @@
 <body>
     <!-- This is an example app structure, you can modify this as much as you choose --> 
     <header id="banner">
-        <h1>Quickpic</h1>
+        <h1>Quickpic.</h1>
+        <ul class="nav">
+            <li class="nav-item" id="nav-profile">Profile</li>
+            <li class="nav-item" id="nav-post">Create Post</li>
+            <li class="nav-item" id="logout">Logout</li>
+        </ul>
     </header>
     <main role="main" id="page">
         <!-- app goes here --> 
@@ -45,18 +50,18 @@
                 <div id="profile-info-container">
                     <h1 id="profile-username"></h1>
                     <h3 id="id-number"></h1>
-                        <div id="followers-container">
-                        </div>
-                        <div id="profile-info">
-                        </div>
-                        <button id="follow-button" class="button-template"></button>
+                    <div id="followers-container">
                     </div>
-                    <div id="profile-following">
-                    <ul>
-                        <li>placeholder</li>
-                    </ul>
+                    <div id="profile-info">
                     </div>
+                    <button id="follow-button" class="button-template"></button>
                 </div>
+                <div id="profile-following">
+                    <h2>Following</h2>
+                    <ul id="following-list">
+                    </ul>
+                </div>
+            </div>
             <div id="profile-posts">
             </div>
         </div>

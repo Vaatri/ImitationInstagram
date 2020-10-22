@@ -14,39 +14,9 @@ const randomHex = () => randomInteger(256).toString(16);
 /* returns a randomColor */
 export const randomColor = () => '#'+range(3).map(randomHex).join('');
 
-
-/**
- * Given a js file object representing a jpg or png image, such as one taken
- * from a html file input element, return a promise which resolves to the file
- * data as a data url.
- * More info:
- *   https://developer.mozilla.org/en-US/docs/Web/API/File
- *   https://developer.mozilla.org/en-US/docs/Web/API/FileReader
- *   https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs
- * 
- * Example Usage:
- *   const file = document.querySelector('input[type="file"]').files[0];
- *   console.log(fileToDataUrl(file));
- * @param {File} file The file to be read.
- * @return {Promise<string>} Promise which resolves to the file as a data url.
- */
-export function fileToDataUrl(file) {
-    const validFileTypes = [ 'image/jpeg', 'image/png', 'image/jpg' ]
-    const valid = validFileTypes.find(type => type === file.type);
-    // Bad data, let's walk away.
-    if (!valid) {
-        throw Error('provided file is not a png, jpg or jpeg image.');
-    }
-    
-    const reader = new FileReader();
-    const dataUrlPromise = new Promise((resolve,reject) => {
-        reader.onerror = reject;
-        reader.onload = () => resolve(reader.result);
-    });
-    reader.readAsDataURL(file);
-    return dataUrlPromise;
+export const get_token = () => {
+    return `Token ${localStorage.getItem('user_token')}`;
 }
-
 
 /**
  * You don't have to use this but it may or may not simplify element creation
@@ -104,7 +74,7 @@ const create_like_button = (id) => {
     like_button_container.appendChild(like_button);
     
     like_button.addEventListener('click', () => {
-        const user_token = `Token ${localStorage.getItem('user_token')}`;    
+        const user_token = get_token();    
         api.get_request(`post/like/?id=${id}`, {method:'PUT', headers: { 
                                                                             'Content-Type': 'application/json', 
                                                                             'Authorization':  user_token }
@@ -177,6 +147,7 @@ const create_popup_exit = () => {
             while(popup_content.hasChildNodes()){
                     popup_content.removeChild(popup_content.lastChild);
             }
+
         });
     return exit_button;
 }
@@ -199,6 +170,8 @@ const create_popup_content = (header, post) => {
 export function setup_comment_popup(comment, post){
     
     comment.addEventListener('click', () => {
+        popup_content.style.flexDirection = 'row';
+        popup_content.style.alignItems = 'stretch';
         let popup_data_container = create_popup_content('Comments', post);
         //add all the comments
         const comments_list = createElement('ul', null, {id: 'comments-list'});
@@ -227,10 +200,12 @@ function setup_likes_popup(likes, post) {
 
     //setup the eventlistener
     likes.addEventListener('click', (event) =>{
+        popup_content.style.flexDirection = 'row';
+        popup_content.style.alignItems = 'stretch';
         let popup_data_container = create_popup_content('Likes', post);
         const likes_list = createElement('ul', null, {id: 'likes-list'});
         popup_data_container.appendChild(likes_list);
-        const token = `Token ${localStorage.getItem('user_token')}`;
+        const token = get_token();
         
         let user_list = [];
         
@@ -248,28 +223,14 @@ function setup_likes_popup(likes, post) {
             for(let username of user_list){
                 const li = createElement('li', '', {class: 'popup-list-item'});
                 const comment_author = createElement('b', username, {class:'link-to-profile'});
-                comment_author.addEventListener('click', ()=>{
+                comment_author.addEventListener('change', ()=>{
                     link_profile(username);
                 });
                 li.appendChild(comment_author);
                 li.appendChild(createElement('span',` likes this.`,{class: 'comment-text'}));
                 likes_list.appendChild(li);
             }
-        });
-        
-    //     post.meta.likes.forEach((user_id) => {
-    //         api.get_user_from_id(user_id, token)
-    //         .then(data => {
-    //             const li = createElement('li', '', {class: 'popup-list-item'});
-    //             const comment_author = createElement('b', `${data.username}`, {class:'link-to-profile'});
-    //             li.appendChild(comment_author);
-    //             comment_author.addEventListener('click', () => {
-    //                 link_profile(data.username);
-    //             });
-    //             comment_author.appendChild(createElement('span',` likes this.`,{class: 'comment-text'}));
-    //             likes_list.appendChild(li);
-    //         });    
-    //     })      
+        });   
         popup.style.display = 'block';
     });
     
@@ -297,30 +258,7 @@ function convert_time(published_time) {
     }
 }
 
-// Given an input element of type=file, grab the data uploaded for use
-export function uploadImage(event) {
-    const [ file ] = event.target.files;
 
-    const validFileTypes = [ 'image/jpeg', 'image/png', 'image/jpg' ]
-    const valid = validFileTypes.find(type => type === file.type);
-
-    // bad data, let's walk away
-    if (!valid)
-        return false;
-    
-    // if we get here we have a valid image
-    const reader = new FileReader();
-    
-    reader.onload = (e) => {
-        // do something with the data result
-        const dataURL = e.target.result;
-        const image = createElement('img', null, { src: dataURL });
-        document.body.appendChild(image);
-    };
-
-    // this returns a base64 image
-    reader.readAsDataURL(file);
-}
 
 /* 
     Reminder about localStorage
@@ -342,4 +280,106 @@ export function set_disabled_button(button, text) {
     button.style.color = 'white';
     button.style.fontWeight = 'bold';
     
+}
+
+export function display_post_popup() {
+    popup.style.display = 'flex';
+    //this popup is different to the comments/likes popup so we need to change the way its made
+    popup_content.style.flexDirection = 'column';
+
+    popup_content.style.alignItems = 'center';
+    const exit_container = createElement('div', null, {class: 'exit-container'});
+    exit_container.appendChild(createElement('h2', 'New Post', {class: 'popup-header-text'}))
+    const exit_button = create_popup_exit();
+    exit_container.appendChild(exit_button);
+    popup_content.appendChild(exit_container);
+    
+    //exit button will be positioned outside of the div so we need to change the positioning style
+
+    const image_container = createElement('div', null, {id: 'image-template'});
+    popup_content.appendChild(image_container);
+    
+    //add image area and description text area
+    const upload_button = createElement('input', null, {id: 'upload-button', class: 'button-template', type: 'file'});
+    upload_button.addEventListener('change', (event) => {
+        const file = upload_button.files[0];
+        fileToDataUrl(file)
+        .then(data => {
+            console.log(data);
+            const image_src = data.slice(38);
+            const img_preview = createElement('img', null, {src: data});
+            document.getElementById('image-template').appendChild(img_preview);
+        });
+    });
+    image_container.appendChild(upload_button);
+    const desc = createElement('textarea', null, {id: 'post-description', placeholder: 'Enter description', cols: 45});
+    popup_content.appendChild(desc);
+
+    //add buttons
+    const button_container = createElement('div', null, {id: 'post-buttons'});
+    const reset_button = createElement('button', 'Reset', {class: 'button-template'});
+    const post_button = createElement('button', 'Post', {class: 'button-template'});
+    button_container.appendChild(reset_button);
+    button_container.appendChild(post_button);
+    popup_content.appendChild(button_container);
+
+}
+
+// Given an input element of type=file, grab the data uploaded for use
+export function uploadImage(event) {
+    const [ file ] = event.target.files;
+
+    console.log(file);
+    const validFileTypes = [ 'image/jpeg', 'image/png', 'image/jpg' ]
+    const valid = validFileTypes.find(type => type === file.type);
+
+    // bad data, let's walk away
+    if (!valid)
+        return false;
+    
+    // if we get here we have a valid image
+    const reader = new FileReader();
+    
+    reader.onload = (e) => {
+        // do something with the data result
+        const dataURL = e.target.result;
+        const image = createElement('img', null, { src: dataURL });
+
+        document.body.appendChild(image);
+    };
+
+    // this returns a base64 image
+    reader.readAsDataURL(file);
+}
+
+/**
+ * Given a js file object representing a jpg or png image, such as one taken
+ * from a html file input element, return a promise which resolves to the file
+ * data as a data url.
+ * More info:
+ *   https://developer.mozilla.org/en-US/docs/Web/API/File
+ *   https://developer.mozilla.org/en-US/docs/Web/API/FileReader
+ *   https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs
+ * 
+ * Example Usage:
+ *   const file = document.querySelector('input[type="file"]').files[0];
+ *   console.log(fileToDataUrl(file));
+ * @param {File} file The file to be read.
+ * @return {Promise<string>} Promise which resolves to the file as a data url.
+ */
+export function fileToDataUrl(file) {
+    const validFileTypes = [ 'image/jpeg', 'image/png', 'image/jpg' ]
+    const valid = validFileTypes.find(type => type === file.type);
+    // Bad data, let's walk away.
+    if (!valid) {
+        throw Error('provided file is not a png, jpg or jpeg image.');
+    }
+    
+    const reader = new FileReader();
+    const dataUrlPromise = new Promise((resolve,reject) => {
+        reader.onerror = reject;
+        reader.onload = () => resolve(reader.result);
+    });
+    reader.readAsDataURL(file);
+    return dataUrlPromise;
 }

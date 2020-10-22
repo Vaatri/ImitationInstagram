@@ -1,6 +1,8 @@
 #popup {
     display:none;
     position: fixed;
+    align-items: center;
+    justify-content: center;
     z-index: 1;
     height: 100%;
     width: 100%;
@@ -49,6 +51,7 @@
     border-style: none;
     margin: 1vw;
     height: 40%;
+
 }
 
 #popup-exit:active, #popup-exit:hover {
@@ -57,7 +60,6 @@
 
 .popup-list-item, .popup-list-item {
     padding-right: 2em;
-    list-style-type: none;
     margin-bottom: 1vh;
     font-size: 2vh;
 }
@@ -74,4 +76,35 @@
 
 .comment-text:hover {
     text-decoration: none;
+}
+
+/* Upload a post CSS */
+#post-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
+#image-template {
+    background-color: rgb(196, 196, 196);
+    width: 30vw;
+    height: 55vh;
+    display:flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.exit-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.exit-container .popup-header-text {
+    margin: 5px 20px;
+}
+
+#image-template {
+    background-size: contain;
 }
