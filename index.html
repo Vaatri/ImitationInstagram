@@ -16,17 +16,21 @@
 <body>
     <!-- This is an example app structure, you can modify this as much as you choose --> 
     <header id="banner">
-        <h1>Quickpic.</h1>
-        <ul class="nav">
-            <li class="nav-item" id="nav-profile">Profile</li>
-            <li class="nav-item" id="nav-post">Create Post</li>
-            <li class="nav-item" id="logout">Logout</li>
-        </ul>
+        <h1 id='nav-feed'>Quickpic.</h1>
+        <div id="nav-bar-container">
+            <ul class="nav" id="nav-bar">
+                <!-- <li class="nav-item" id="nav-feed">Feed</li> -->
+                <li class="nav-item" id="nav-profile">Profile</li>
+                <li class="nav-item" id="nav-post">Create Post</li>
+                <li class="nav-item" id="logout">Logout</li>
+            </ul>
+            <img id="settings-icon" alt='settings-icon' src='https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Windows_Settings_app_icon.png/600px-Windows_Settings_app_icon.png'>
+        </div>
     </header>
     <main role="main" id="page">
         <!-- app goes here --> 
         <div id="popup">
-            <div id="popup-content">
+            <div class="popup-content">
             </div>
         </div>
         <div id="form-container">
@@ -58,8 +62,7 @@
                 </div>
                 <div id="profile-following">
                     <h2>Following</h2>
-                    <ul id="following-list">
-                    </ul>
+                    <ul id="following-list"></ul>
                 </div>
             </div>
             <div id="profile-posts">
@@ -70,5 +73,7 @@
         <p>&copy; Quickpic</p>
     </footer>
     <script type="module" src="src/main.js"></script>
+    <script type="module" src="src/popups.js"></script>
+    <script type="module" src="src/profile.js"></script>
 </body>
 </html>

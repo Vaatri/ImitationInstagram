@@ -28,10 +28,6 @@ li {
     width: 94%;
 }
 
-.nav {
-    list-style-type: none;
-    padding: 0;
-}
 
 .nav-item {
     border: 1px solid rgba(0, 0, 0, 0.1);
@@ -44,9 +40,6 @@ li {
     font-size: 0.8em;
 }
 
-#nav-profile {
-    display: none;
-}
 
 #footer {
     border-top: 1px solid rgba(0,0,0,.0975);
@@ -134,6 +127,10 @@ input[type=submit], input[type=button] {
     flex: 1;
 }
 
+#nav-feed:hover {
+    cursor: pointer;
+}
+
 #header-break {
     border-top: 3px;
     border-style: solid;
@@ -189,19 +186,66 @@ section {
     background: linear-gradient(90deg, rgba(171,167,241,1) 0%, rgba(183,183,233,1) 30%, rgba(205,234,240,1) 100%);
 }
 
-
-
-/* ::-webkit-scrollbar {
-    width: 3%;
+.error-msg {
+    color: red;
+    font-size: 0.8em;
+    margin-bottom: 10px;
+    width: 70%;
 }
 
-::-webkit-slider-thumb {
-    background: rgb(131, 131, 131);
-    border-radius: 1em;
+#settings-icon {
+    width: 3%;
+    height: 3%;
+    padding-left: 1%;
+}
 
-} */
+#settings-icon:hover {
+    cursor: pointer;
+}
 
-/* ::-webkit-slider-thumb:hover, ::-webkit-scrollbar:hover {
-    opacity: 1;
-} */
+#nav-bar-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+}
 
+
+.settings {
+    display: inline;
+}
+
+
+#suggestions-container {
+    background-color: white;
+    box-shadow: 5px 9px 24px 8px rgba(0,0,0,0.34);
+    padding-right: 5%;
+    margin-bottom: 5%;
+    max-width: 30%;
+}
+
+@media screen and (max-width: 600px) {
+    
+    #banner {
+        height: 5vh;
+    }
+
+    #form-container {
+        margin: 25vh 20vw;
+    }
+    
+    #feed {
+        margin-top: 10%;
+    }
+    
+
+}
+
+@media screen and (max-width: 900px) and (min-width: 600px) {
+    
+    #form-container {
+        margin: 20vh 25vw;
+    }
+
+
+}

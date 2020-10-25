@@ -1,5 +1,8 @@
+import {get_token, clear_content} from './helpers.js';
+
 // change this when you integrate with the real API, or when u start using the dev server
 const API_URL = 'http://localhost:5000'
+
 
 const getJSON = (path, options) => 
     fetch(path, options)
@@ -25,7 +28,30 @@ export default class API {
         return response;
     }
     
-    get_user(token, options) {
+    login_user(username, pwd) {
+        const options = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({'username': username, 'password': pwd})
+        }
+        
+        return this.makeAPIRequest('auth/login', options);
+    }
+    
+    get_feed(p) {
+        const options = {
+            method: 'GET',  
+            headers: { 'Authorization': get_token(), src: "data:image/jpeg;base64" }
+        }
+        return this.makeAPIRequest(`user/feed?p=${p}`, options)
+    }
+    
+    get_user() {
+        const options = {
+            method: 'GET',
+            headers: {'Content-Type': 'application/json', 'Authorization': get_token()}
+        };
+        
         return this.makeAPIRequest(`user/`, options);
     }
     
@@ -42,5 +68,58 @@ export default class API {
     //     return response;
     // }
     
+    post(image, description) {
+        const payload = { 'description_text': description ,
+                        'src': image
+        };
+        
+        const options = { 
+                        method: 'POST', 
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': get_token()    
+                                },
+                        body: JSON.stringify(payload)
+        };
+        
+        return this.makeAPIRequest('post/', options);
+    }
     
+    get_post(id) {
+        const options = { method: 'GET',  
+                        headers: { 'Authorization': get_token() , src: "data:image/jpeg;base64"}
+                        };
+        return this.makeAPIRequest(`post/?id=${id}`, options)     ;
+    }
+    
+    edit_post(id, payload) {
+        const options = { method: 'PUT',
+                          headers: { 'Authorization': get_token() ,'Content-Type': 'application/json'},
+                          body: JSON.stringify(payload)
+                        }
+    
+        return this.makeAPIRequest(`post/?id=${id}`, options);
+    }
+    
+    delete_post(id) {
+        const options = { method: 'DELETE', headers: { 'Authorization': get_token()}}
+        return this.makeAPIRequest(`post/?id=${id}`, options);
+    }
+    
+    post_comment(id, comment) {
+        const options = { method: 'PUT',
+                          headers: { 'Authorization': get_token() ,'Content-Type': 'application/json'},
+                          body: JSON.stringify({'comment': comment})
+                        }
+        return this.makeAPIRequest(`post/comment?id=${id}`, options);                
+    }
+    
+    update_profile(payload) {
+        const options = {
+            method: 'PUT',
+            headers: { 'Authorization': get_token() ,'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        };
+        return this.makeAPIRequest(`user/`, options);
+    }
 }

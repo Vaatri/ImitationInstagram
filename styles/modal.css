@@ -13,11 +13,22 @@
     vertical-align: bottom;
 }
 
-#popup-content {
+.popup-content, .popup-content-alternate {
     background-color: white;
     display: flex;
+
+}
+
+.popup-content {
     flex-direction: row;
+    align-items: stretch;
     margin: 25vh 25vw;
+}
+
+.popup-content-alternate {
+    flex-direction: column;
+    align-items: center;
+    width: 60vw;
 }
 
 .popup-header {
@@ -30,12 +41,13 @@
 
 .popup-data-container {
     flex: 1;
+    width: 100%;
 }
 
-.post-image {
+/* .post-image {
     max-width: 30vw;
     object-fit: cover;
-}
+} */
 
 .comments:hover, .likes:hover {
     cursor: pointer;
@@ -54,6 +66,8 @@
 
 }
 
+
+
 #popup-exit:active, #popup-exit:hover {
     background-color: rgb(226, 226, 226);
 }
@@ -64,9 +78,13 @@
     font-size: 2vh;
 }
 
+#comments-list {
+    height: 30vh;
+}
 
 #comments-list, #likes-list {
     padding-left: 1vw;
+    
 }
 
 
@@ -107,4 +125,84 @@
 
 #image-template {
     background-size: contain;
+    width:100%;
+}
+
+.img-preview {
+    width: 100%;
+    object-fit: scale-down;
+}
+
+
+/* Update settings css */
+table {
+    text-align: right;
+}
+
+
+/* Need to fix popup content on likes/comments */
+@media screen and (max-width: 500px) {
+    #image-template {
+        width: 90vw;
+    }
+    
+    .popup-data-container {
+        padding-left: 5vw;
+    }
+    
+    .popup-content-alternate {
+        height: 100%;
+        justify-content: center;
+    }
+    
+    #comments-list {
+        overflow-y: scroll;
+    }
+    #post-description {
+        height: 30vh;
+    }
+    
+    #post-buttons .button-template {
+        padding: 1em;
+        font-size: 15pt;
+    }
+    
+    .popup-header-text {
+        font-size: 20pt;
+    }
+    #popup-exit {
+        font-size: 2em;
+    }
+
+}
+
+@media screen and (max-width: 900px) and (min-width: 800px) {
+    
+    .popup-content-alternate {
+        width: 70vw;
+    }
+    
+    #image-template {
+        width: 100%;
+    }
+    
+    .popup-content .post-image {
+        max-width: 50vw;
+    }
+    
+    #post-buttons .button-template {
+        padding: 1em;
+        font-size: 15pt;
+    }
+
+    #post-description {
+        height: 20%;
+    }
+    
+    .popup-content {
+        width: 85vw;
+        margin: 25vh 6vw;
+    }
+    
+
 }

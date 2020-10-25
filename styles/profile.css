@@ -42,6 +42,7 @@
     flex-direction: row;
     justify-content: center;
     /* align-items: center; */
+    max-height: 300px;
 }
 
 
@@ -50,16 +51,45 @@
     flex-direction: column;
     border: 1px solid rgba(99, 99, 99, 0.75);
     background-color: white;
-    align-items: center;
+    /* align-items: center; */
     padding: 0 5%;
     margin: 5vh 0;
-    overflow: scroll;
-    overflow-y: hidden;
-    overflow-x: hidden;
     min-width: 30%;
-
+    max-height: 300px;
 }
 
 #following-list {
-    padding: 0;
+    padding-left: 0;
+    overflow-y: scroll;    
+    border-top: 1px solid rgba(99, 99, 99, 0.75);
+    margin-top: 0;
+    margin-bottom: 15%;
+}
+
+h2 {
+    margin-bottom: 2%;
+}
+
+@media screen and (max-width: 600px) {
+    #profile-page {
+        margin-top: 4vh;
+    }
+    
+    #profile-info-container, #profile-following {
+        margin: 0;
+        margin-top: 5vh;
+    }
+    
+    .post-meta-container {
+        align-items: flex-start;
+    }
+}
+
+
+@media screen and (max-width: 900px) and (min-width: 600px) {
+    
+    #profile-info-container, #profile-following {
+        margin: 0;
+    }
+
 }

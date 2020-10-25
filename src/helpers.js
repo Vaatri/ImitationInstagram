@@ -1,5 +1,6 @@
 import API from "./api.js";
 import { link_profile } from "./profile.js";
+import { display_post_popup, setup_comment_popup, setup_edit_popup, setup_likes_popup } from "./popups.js";
 
 const api = new API();
 /* returns an empty array of size max */
@@ -45,14 +46,19 @@ export function createElement(tag, data, options = {}) {
 export function createPostTile(post) {
     const section = createElement('section', null, { class: 'post' });
     
-    //add author
-    
+    //add
+    const post_header = createElement('div', null, {class: 'post-header-container'});
     const post_author = createElement('h2', post.meta.author, { class: 'post-title' });
+    // const edit_post = createElement('h2', '\u2630', {class: 'edit-icon-feed'});
+    
+    post_header.appendChild(post_author);
+    // post_header.appendChild(edit_post);
+    
     post_author.addEventListener('click', () => {
         link_profile(post.meta.author);
     });
 
-    section.appendChild(post_author);
+    section.appendChild(post_header);
     
     //create div for the content
     const content = createElement('div', null, {class: "content-container"});
@@ -68,26 +74,72 @@ export function createPostTile(post) {
     return section;
 }
 
-const create_like_button = (id) => {
-    const like_button_container = createElement('div', null, {});
-    const like_button = createElement('button', 'Like this', {class: 'like-button', class: 'button-template'});
-    like_button_container.appendChild(like_button);
+//function that returns a bool whether if the post is liked by the current user
+const check_liked = (post) => {        
+    return api.get_user()
+    .then(user => {
+        return post.meta.likes.includes(user.id);
+    })
+
     
-    like_button.addEventListener('click', () => {
-        const user_token = get_token();    
-        api.get_request(`post/like/?id=${id}`, {method:'PUT', headers: { 
-                                                                            'Content-Type': 'application/json', 
-                                                                            'Authorization':  user_token }
-                                                                            })
-        .then(data => {
-            console.log(data);
-        })
-    });
+}
+
+
+//create a like button and add its functionality
+const create_like_button = (id) => {
+
+    //create the button and set up event listeners
+    const like_button_container = createElement('div', null, {});
+    const like_button = createElement('button');
+    like_button_container.appendChild(like_button);
     
     return like_button_container;
 }
 
-
+//sorry in advance for this spaghetti
+const set_like_button = (button,post) => {
+        //This is the initial check if the post is liked or not
+        check_liked(post)
+        .then(isLiked => {
+            //set the appropriate style of the button
+            let text = 'Like this';
+            button.className = 'like-button button-template';
+            if(isLiked) {
+                text = 'Liked!'
+                button.className =  'like-button button-template liked-button';
+            }
+            button.textContent = text;
+            //Now handle the click functionality and change of style/text 
+            button.addEventListener('click', () => {
+                let path = 'like'
+                if(button.textContent === 'Liked!') {
+                    path = 'unlike';
+                }
+                console.log(path);
+                //then actually call the api to send the like/unlike
+                const user_token = get_token();  
+                api.get_request(`post/${path}/?id=${post.id}`, {method:'PUT', headers: { 
+                    'Content-Type': 'application/json', 
+                    'Authorization':  user_token }
+                })
+                //then get the post so we can update the likes
+                .then(() => {
+                    if(path === 'like') {
+                        button.textContent = 'Liked!';
+                        button.className =  'like-button button-template liked-button';
+                    } else {
+                        button.textContent = 'Like this';
+                        button.className = 'like-button button-template';
+                    }
+                    return api.get_post(post.id);
+                })
+                .then(post => {
+                    document.getElementById(`likes-count-${post.id}`).textContent = `${post.meta.likes.length} people like this`;
+                });
+                
+            })
+        });
+}
 /**
  * Create an image from the given post and return an image 
  * @param {*} post 
@@ -112,20 +164,16 @@ export function createPostInfo(post) {
     const post_data = createElement('div', null, {class: 'post-meta-data'})
     post_data_container.appendChild(post_data);
     
-    //add a like button to the post
-    post_data_container.appendChild(create_like_button(post.id));
-    
     //add author description
     const author_text = createElement('b', `${post.meta.author}`, {class: 'author-desc' , class: 'link-to-profile'});
     post_data.appendChild(author_text);
     
-    
-    
     post_data.appendChild(createElement('span', `: ${post.meta.description_text}`, {class: 'desc-text'}));
     
     //add likes, comments and date
-    const comments = createElement('p', `There are ${post.comments.length} comments`, {class : 'comments'});
-    const likes = createElement('p', `${post.meta.likes.length} people like this`, {class : 'likes'});
+    const comments = createElement('p', `${post.comments.length} people have commented`, {class : 'comments', id: `comments-count-${post.id}`});
+    const likes = createElement('p', `${post.meta.likes.length} people like this`, {class : 'likes', id: `likes-count-${post.id}`});
+    
     setup_comment_popup(comments, post);
     setup_likes_popup(likes, post);
     
@@ -133,109 +181,40 @@ export function createPostInfo(post) {
     post_data.appendChild(comments);
     post_data.appendChild(createElement('p', `Published: ${convert_time(post.meta.published)}`, {class: "published"}));
     
+    //add a like button to the post
+    const like_button = create_like_button(post.id);
+    set_like_button(like_button, post);
+    post_data_container.appendChild(like_button);
+    post_data_container.appendChild(create_comment_input(post.id));
+    
     return post_data_container;
 }
 
-const popup = document.getElementById('popup');
-const popup_content = document.getElementById('popup-content');
-
-const create_popup_exit = () => {
-
-    let exit_button = createElement('button', 'X', {id:'popup-exit'});
-        exit_button.addEventListener('click', (event) => {
-            popup.style.display = 'none';
-            while(popup_content.hasChildNodes()){
-                    popup_content.removeChild(popup_content.lastChild);
-            }
-
+export const create_comment_input = (id) => {
+    const comment_container = createElement('div', null, {class: 'post-comments'});
+    const comment_box = createElement('textarea', null, {placeholder: 'Write a comment...', class: 'comment-box'});
+    const comment_button = createElement('button', 'Post', {class: 'post-comment-button'});
+    comment_button.addEventListener('click', _ => {
+        const comment = comment_box.value;
+        api.post_comment(id, comment)
+        .then((data) => {
+ 
+            comment_button.textContent = "Posted!";
+            comment_box.value = '';
+            setTimeout(() => {comment_button.textContent = "Post"}, 1500);
+            return api.get_post(id);
+        })
+        //this should give a live update of the comments count.
+        .then((post) => {
+            document.getElementById(`comments-count-${id}`).textContent = `${post.comments.length} people have commented`;
         });
-    return exit_button;
-}
-
-const create_popup_content = (header, post) => {
-    //add the image
-    popup_content.appendChild(createPostImage(post));
-    //create a div with the header and exit button
-    let popup_data_container = createElement('div', null, {class: 'popup-data-container'});
-    popup_content.appendChild(popup_data_container);
-    
-    let header_exit_div = createElement('div',null, {class: 'popup-header'});
-    header_exit_div.appendChild(createElement('h2', header, {class: 'popup-header-text'}));        
-    header_exit_div.appendChild(create_popup_exit());
-    popup_data_container.appendChild(header_exit_div);
-    
-    return popup_data_container;
-}
-
-export function setup_comment_popup(comment, post){
-    
-    comment.addEventListener('click', () => {
-        popup_content.style.flexDirection = 'row';
-        popup_content.style.alignItems = 'stretch';
-        let popup_data_container = create_popup_content('Comments', post);
-        //add all the comments
-        const comments_list = createElement('ul', null, {id: 'comments-list'});
-        post.comments.forEach((comment) => {
-            const li = createElement('li', '', {class: 'popup-list-item'});
-            const comment_author = createElement('b', `${comment.author}`, {class:'link-to-profile'});
-            comment_author.appendChild(createElement('span',`: ${comment.comment}`,{class:'comment-text'}));
-            comment_author.addEventListener('click', ()=>{
-                link_profile(comment.author);
-            });
-            
-            comments_list.appendChild(li);
-            li.appendChild(comment_author);
-        });
-        popup_data_container.appendChild(comments_list);
-        popup.style.display = 'block';
-        //create the comments list
-    
     });
     
-
-}
-
-
-function setup_likes_popup(likes, post) {
-
-    //setup the eventlistener
-    likes.addEventListener('click', (event) =>{
-        popup_content.style.flexDirection = 'row';
-        popup_content.style.alignItems = 'stretch';
-        let popup_data_container = create_popup_content('Likes', post);
-        const likes_list = createElement('ul', null, {id: 'likes-list'});
-        popup_data_container.appendChild(likes_list);
-        const token = get_token();
-        
-        let user_list = [];
-        
-        const allPromises = Array.from(Array(post.meta.likes.length)).map((_, i) => {       
-            return api.get_user_from_id(post.meta.likes[i], token)
-            .then(user => {
-                user_list.push(user.username); 
-            });
-        });
-        console.log(allPromises);
-        
-        Promise.all(allPromises)
-        .then(() => {
-            console.log(user_list);
-            for(let username of user_list){
-                const li = createElement('li', '', {class: 'popup-list-item'});
-                const comment_author = createElement('b', username, {class:'link-to-profile'});
-                comment_author.addEventListener('change', ()=>{
-                    link_profile(username);
-                });
-                li.appendChild(comment_author);
-                li.appendChild(createElement('span',` likes this.`,{class: 'comment-text'}));
-                likes_list.appendChild(li);
-            }
-        });   
-        popup.style.display = 'block';
-    });
+    comment_container.appendChild(comment_box);
+    comment_container.appendChild(comment_button);
     
+    return comment_container;
 }
-
 
 function convert_time(published_time) {
     
@@ -245,12 +224,12 @@ function convert_time(published_time) {
 
     if (seconds > 24*3600) {
         const days = Math.floor(seconds/(24*3600));
-       return `Posted ${days} ago`;
+       return `Posted ${days} days ago`;
     }
 
     if (seconds > 3600) {
         const hours = seconds/3600
-       return `Posted ${hours} ago`;
+       return `Posted ${hours} hours ago`;
     }
 
     if (seconds > 60) {
@@ -258,7 +237,11 @@ function convert_time(published_time) {
     }
 }
 
-
+export function clear_content(container) {
+    while(container.hasChildNodes()){
+        container.removeChild(container.lastChild);
+    }
+}
 
 /* 
     Reminder about localStorage
@@ -282,47 +265,8 @@ export function set_disabled_button(button, text) {
     
 }
 
-export function display_post_popup() {
-    popup.style.display = 'flex';
-    //this popup is different to the comments/likes popup so we need to change the way its made
-    popup_content.style.flexDirection = 'column';
-
-    popup_content.style.alignItems = 'center';
-    const exit_container = createElement('div', null, {class: 'exit-container'});
-    exit_container.appendChild(createElement('h2', 'New Post', {class: 'popup-header-text'}))
-    const exit_button = create_popup_exit();
-    exit_container.appendChild(exit_button);
-    popup_content.appendChild(exit_container);
-    
-    //exit button will be positioned outside of the div so we need to change the positioning style
-
-    const image_container = createElement('div', null, {id: 'image-template'});
-    popup_content.appendChild(image_container);
-    
-    //add image area and description text area
-    const upload_button = createElement('input', null, {id: 'upload-button', class: 'button-template', type: 'file'});
-    upload_button.addEventListener('change', (event) => {
-        const file = upload_button.files[0];
-        fileToDataUrl(file)
-        .then(data => {
-            console.log(data);
-            const image_src = data.slice(38);
-            const img_preview = createElement('img', null, {src: data});
-            document.getElementById('image-template').appendChild(img_preview);
-        });
-    });
-    image_container.appendChild(upload_button);
-    const desc = createElement('textarea', null, {id: 'post-description', placeholder: 'Enter description', cols: 45});
-    popup_content.appendChild(desc);
-
-    //add buttons
-    const button_container = createElement('div', null, {id: 'post-buttons'});
-    const reset_button = createElement('button', 'Reset', {class: 'button-template'});
-    const post_button = createElement('button', 'Post', {class: 'button-template'});
-    button_container.appendChild(reset_button);
-    button_container.appendChild(post_button);
-    popup_content.appendChild(button_container);
-
+export function display_edit_popup(id) {
+    setup_edit_popup(id);
 }
 
 // Given an input element of type=file, grab the data uploaded for use
@@ -382,4 +326,42 @@ export function fileToDataUrl(file) {
     });
     reader.readAsDataURL(file);
     return dataUrlPromise;
+}
+
+
+export function create_update_table () {
+    const table = createElement('table', null, {id: 'update-table'});
+    table.appendChild(create_table_row('text', 'New Name', 'new-name', 'Leave blank if unchanged'));
+    table.appendChild(create_table_row('password','New Password', 'new-pwd', 'Leave blank if unchanged'));
+    table.appendChild(create_table_row('password','Verify Password', 'verify-pwd', 'Leave blank if unchanged'));
+    table.appendChild(create_table_row('text', 'New Email', 'new-email', 'Leave blank if unchanged'));
+    table.appendChild(create_table_row('password','Current Password', 'pwd-confirm', ''));    
+    return table;
+}
+
+export function create_table_row (type, heading, id, placeholder) {
+
+    const row = createElement('tr', null, {});
+    row.appendChild(createElement('td', heading));
+    const input = createElement('input', null, {type: type, id: id, placeholder: placeholder});
+    const cell = createElement('td', null, {});
+    cell.appendChild(input);
+    row.appendChild(cell);
+
+    return row;
+}
+
+export function throttle(fn, wait) {
+    let time = Date.now();
+    return () => {
+        if((time + wait - Date.now()) < 0) {
+            fn();
+            time = Date.now();
+        }
+    }
+}
+
+export function create_suggestion_item(name) {
+    const li = createElement('li', name, {class: 'popup-list-item', class:'link-to-profile'});
+    return li;
 }

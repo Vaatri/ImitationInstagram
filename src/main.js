@@ -1,6 +1,7 @@
 // importing named exports we use brackets
-import { createElement, createPostTile, createPostImage, uploadImage, display_post_popup } from './helpers.js';
+import { createElement, createPostTile, create_suggestion_item, get_token } from './helpers.js';
 import {link_profile} from './profile.js';
+import {display_post_popup, display_settings_popup} from './popups.js';
 // when importing 'default' exports, use below syntax
 import API from './api.js';
 // A helper you may want to use when uploading new images to the server.
@@ -16,44 +17,71 @@ const form = document.getElementById('form');
 const form_page = document.getElementById('form-container');
 const header = document.getElementById("banner");
 const footer = document.getElementById("footer");
+const profile_page = document.getElementById('profile-page');
 
 //nav bar doms
 const logout_button = document.getElementById('logout');
-const create_post = document.getElementById('nav-post')
+const create_post = document.getElementById('nav-post');
+const user_profile = document.getElementById('nav-profile');
+const settings = document.getElementById('settings-icon');
+const nav_feed = document.getElementById('nav-feed');
+
+
 
 //misc doms
 const login_form = document.forms.login_register_form;
 const form_header = document.getElementById("form-header");
-const upload_post = document.getElementById('')
+
+let num_posts = 0;
 
 const api = new API();
 
+//debug
+console.log(get_token());
 
+//nav bar events
 logout_button.addEventListener('click', () => {
     localStorage.clear();
     feed_dom.style.display = 'none';
+    profile_page.style.display = 'none';
     form_page.style.display = 'flex';
-    document.getElementById('nav-profile').style.display = 'none';
+    document.getElementById('nav-bar').style.display = 'none';
     while(feed_dom.hasChildNodes()) {
-        feed_dom.removeChild(feed_dom.lastElementChild);
+        feed_dom.removeChild(feed_dom.lastChild);
     }
-    footer.style.backgroundColor = '#e6e6e6';
-    header.style.backgroundColor = '#e6e6e6';
-    
+    footer.style.background = '#e6e6e6';
+    header.style.background = '#e6e6e6';
 });
+
+
+settings.addEventListener('click', () => {
+    display_settings_popup();
+});
+
+
+user_profile.addEventListener('click', () => {
+    link_profile(localStorage.getItem('username')); 
+});
+
+
+nav_feed.addEventListener('click', () => {
+    display_feed();
+})
+
 
 window.onload = () => {
     const token = localStorage.getItem('user_token');
     if(token){
         display_feed(token);
+    } else {
+        document.getElementById('nav-bar').style.display = 'none';
     }
 }
 
-
+//initial form submit
 form.addEventListener('submit', (event) => {
     
     event.preventDefault();
-    
     
     const username = login_form.elements.username.value;
     const pwd = login_form.elements.pwd.value;
@@ -61,6 +89,8 @@ form.addEventListener('submit', (event) => {
     let options;    
     let path;
     
+    //check whether its the registration form or login
+    //condition could be more elegant but it works c:
     if(login_form.length === 4){
         const user_details = { username: username, password:pwd };
         options = {
@@ -100,16 +130,17 @@ form.addEventListener('submit', (event) => {
         path = 'auth/signup';
     }
     
+    //by calling makeAPIRequest, we only have to handle one api call, rather than two
     api.makeAPIRequest(path, options)
     .then(response => {
         if(response["message"]) {
-        
             alert(response.message);
         //otherwise save data in localstorage
         } else {
             const token = response.token;
             console.log(token);
             localStorage.setItem('user_token', token);
+            localStorage.setItem('username', username);
             display_feed(token);
         }
     });
@@ -117,55 +148,87 @@ form.addEventListener('submit', (event) => {
 
 });
 
+//some regex to see if its a valid email
 const is_valid_email = (email) => {
     return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
 }
 
+//check if its a valid password lol
 const is_valid_password = (pwd, pwd_confirm) => {
     return pwd === pwd_confirm;
 }
 
-
-const display_feed = (token) => {
-
-    header.style.background = background_gradient;
-    header.style.borderBottom = '1px solid rgb(199, 199, 199)';
-    header.style.height = '50px';
-    footer.style.background = background_gradient;
-    
-    form_page.style.display = 'none';
-
-    document.getElementById('nav-profile').style.display = 'inline';
-
-    const options = {
-        method: 'GET',  
-        headers: { 'Authorization': 'Token ' +token, src: "data:image/jpeg;base64" }
-    }
-    
-    // const feed_dom = document.getElementById("feed");
-    feed_dom.style.display = 'flex'; 
-    
-    api.get_request('user/feed', options)
+//this function displays the feed in the page
+const feed = () => {
+    //call the api to get the posts starting at num_posts
+    api.get_feed(num_posts)
     .then(data => {
-        console.log(data);
         const posts = data.posts;
+        //using the feed_dom as the initial value, append post tiles to it.
         posts.reduce((parent, post) => {
-                    const post_content = createPostTile(post)  
-                    parent.appendChild(post_content);
-                    
-                    return parent;
+            //createPostTile will handle all of the creation of the post, including buttons, modals, etc.
+            const post_content = createPostTile(post)  
+            parent.appendChild(post_content);
+            num_posts++;
+            return parent;
         }, feed_dom)
     })
     .then(() => {
+        //this will create links to profiles presented in the posts.
         link_profiles();
+        //if the user is new, num_posts should still be 0
+        if(num_posts === 0) {
+            display_suggested_following();
+        }
     });
-    
+}
+
+//display some users for a user that just registered and isn't following anyone
+const display_suggested_following = () => {
+    //Create a page with a header, and a suggestions box for the user
+    feed_dom.appendChild(createElement('h1', 'Welcome to Quickpic!, here are some suggestions on who to follow!', {style: 'margin: 1em'}));
+    const suggestions_container = createElement('div', null, {id: 'suggestions-container'});
+    const suggestion_list = createElement('ul', 'Click on their usernames to view their profiles!', {id: 'suggestion-list'})
+    suggestion_list.appendChild(createElement('hr', null, {}));
+    suggestions_container.appendChild(suggestion_list);
+    //this will create a li with the username, a link to their profile, and a follow button
+    suggestion_list.appendChild(create_suggestion_item('Andrew'));
+    suggestion_list.appendChild(create_suggestion_item('Ava'));
+    suggestion_list.appendChild(create_suggestion_item('Sarah'));
+    suggestion_list.appendChild(create_suggestion_item('Matthew'));
+    suggestion_list.appendChild(create_suggestion_item('Jack'));
+    suggestion_list.appendChild(create_suggestion_item('Harper'));
+    suggestion_list.appendChild(create_suggestion_item('Zoe'));
+    suggestion_list.appendChild(create_suggestion_item('Amelia'));
+    feed_dom.appendChild(suggestions_container);
+    link_profiles();
     
 }
 
+//display the feed
+const display_feed = (token) => {
+    //keeps count of how many posts have been displayed in the feed
+    num_posts = 0;
+
+    //change the header/footer css to make it more kawaii
+    header.style.background = background_gradient;
+    header.style.borderBottom = '1px solid rgb(199, 199, 199)';
+    
+    window.matchMedia("screen and (max-width: 500px)").matches ? header.style.height = '30px': header.style.height = '50px'; 
+    footer.style.background = background_gradient;
+    
+    //set up the feed
+    form_page.style.display = 'none';
+    profile_page.style.display = 'none';
+    document.getElementById('nav-bar').style.display = 'inline';    
+    feed_dom.style.display = 'flex'; 
+    feed();
+    
+}
+
+//searches all elements that have link-to-profile class, and make it link to users profile
 const link_profiles = () => {
     const profile_links = document.querySelectorAll('.link-to-profile');
-    // console.log(profile_links);
     profile_links.forEach((element) => {
         element.addEventListener('click', () => {
             link_profile(element.textContent);
@@ -174,14 +237,7 @@ const link_profiles = () => {
 }
 
 
-const create_pagination = (post) => {
-
-    const button_container = createElement('div', null, {id: 'pagination-container'});
-    feed_dom.appendChild(button_container);
-    
-    
-}
-
+//adds elements so user can register.
 const display_register_form = () => {
 
     form_header.innerText = "REGISTER";
@@ -204,8 +260,8 @@ const display_register_form = () => {
     
 }
 
+//removes the elements used by register and changes the button value
 const display_login_form = () => {
-    
     form_header.innerText = "LOGIN";
     login_form.elements.pwd_confirm.remove();
     login_form.elements.email.remove();
@@ -215,6 +271,7 @@ const display_login_form = () => {
 }
 
 
+//Depending on what the form is, display the correct button
 login_form.elements.secondary.addEventListener('click', (event) => {
     if(login_form.elements.secondary.value === 'Register') {
         display_register_form();
@@ -228,5 +285,26 @@ login_form.elements.secondary.addEventListener('click', (event) => {
 create_post.addEventListener('click', () => {
     display_post_popup();
 });
+
+
+
+// //infinite scroll baby
+//wait is used to throttle the scroll input
+let wait = false;
+document.addEventListener('scroll', () => {
+    let window_pos = window.scrollY;
+    //if it passes this threshold then display the next amount of posts.
+    if(window_pos > (document.body.scrollHeight - 1000) && wait === false) {
+        feed();
+        wait = true;
+        //timer is currently set to half a second.
+        setTimeout(() => { wait = false}, 500);
+    }
+
+});
+
+
+
+
 
 
