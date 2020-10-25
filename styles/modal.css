@@ -22,7 +22,6 @@
 .popup-content {
     flex-direction: row;
     align-items: stretch;
-    margin: 25vh 25vw;
 }
 
 .popup-content-alternate {
@@ -74,12 +73,12 @@
 
 .popup-list-item, .popup-list-item {
     padding-right: 2em;
-    margin-bottom: 1vh;
     font-size: 2vh;
 }
 
 #comments-list {
     height: 30vh;
+    overflow-y: scroll;
 }
 
 #comments-list, #likes-list {
@@ -87,6 +86,17 @@
     
 }
 
+.comment-timestamp {
+    font-size: x-small;
+    text-align: right;
+    margin: 0 0.5vw 0.5vh 1vw;
+    color: rgb(182, 182, 182);
+}
+
+.user-comments-container {
+    display: flex;
+    flex-direction: column;
+}
 
 .comment-text {
     font-weight: normal;
@@ -141,7 +151,7 @@ table {
 
 
 /* Need to fix popup content on likes/comments */
-@media screen and (max-width: 500px) {
+@media screen and (max-width: 600px) {
     #image-template {
         width: 90vw;
     }
@@ -153,6 +163,7 @@ table {
     .popup-content-alternate {
         height: 100%;
         justify-content: center;
+        width: 100vw;
     }
     
     #comments-list {
@@ -166,6 +177,12 @@ table {
         padding: 1em;
         font-size: 15pt;
     }
+    
+    .comment-timestamp {
+        margin-right: 5vw;
+    }
+    
+
     
     .popup-header-text {
         font-size: 20pt;

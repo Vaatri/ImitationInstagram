@@ -1,4 +1,4 @@
-import { fileToDataUrl, createElement, createPostImage, get_token, clear_content, create_update_table, create_table_row, create_comment_input } from './helpers.js';
+import { convert_time, fileToDataUrl, createElement, createPostImage, get_token, clear_content, create_update_table, create_table_row, create_comment_input } from './helpers.js';
 import {link_profile} from './profile.js';
 import API from "./api.js";
 const api = new API();
@@ -147,12 +147,19 @@ export function setup_comment_popup(comment, post){
         .then(post => {    
             let popup_data_container = create_popup_content('Comments', post);
             //add all the comments
-            const comments_list = createElement('ul', null, {id: 'comments-list'});
+            const comments_list = createElement('div', null, {id: 'comments-list'});
             post.comments.forEach((comment) => {
-                comments_list.appendChild(create_list_item(comment.author, `: ${comment.comment}`));
+                const user_comment = create_list_item(comment.author, `: ${comment.comment}`);
+                const comment_div = createElement('div', null, {class: 'user-comments-container'});
+                comment_div.appendChild(user_comment);
+                const timestamp = createElement('span', convert_time(comment.published), {class: 'comment-timestamp'});
+                comment_div.appendChild(timestamp)
+                // comments_list.appendChild(create_list_item(comment.author, `: ${comment.comment}`));
+                // console.log(convert_time(comment.published));
+                comments_list.appendChild(comment_div);
             });
             popup_data_container.appendChild(comments_list);
-            popup.style.display = 'block';
+            popup.style.display = 'flex';
             
             popup_data_container.appendChild(create_comment_input(post.id));
         });
@@ -188,7 +195,7 @@ export function setup_likes_popup(likes, post) {
                     likes_list.appendChild(create_list_item(username, ' likes this.'));
                 }
             });   
-            popup.style.display = 'block';
+            popup.style.display = 'flex';
         });
         
     });

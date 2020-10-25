@@ -8,11 +8,12 @@
 #profile-info-container {
     display: flex;
     flex-direction: column;
-    margin: 5vh 1vw;
+    /* margin: 5vh 1vw; */
     align-items: center;
     padding: 1em 4em;
     border: 1px solid rgba(99, 99, 99, 0.75);
     background-color: white;
+    border-right: none;
 }
 
 #profile-info-container * {
@@ -53,7 +54,7 @@
     background-color: white;
     /* align-items: center; */
     padding: 0 5%;
-    margin: 5vh 0;
+    /* margin: 5vh 0; */
     min-width: 30%;
     max-height: 300px;
 }
@@ -68,6 +69,7 @@
 
 h2 {
     margin-bottom: 2%;
+    color: rgb(100, 100, 100);
 }
 
 @media screen and (max-width: 600px) {
@@ -78,6 +80,21 @@ h2 {
     #profile-info-container, #profile-following {
         margin: 0;
         margin-top: 5vh;
+        padding: 0 5vw;
+        height: 30vh;
+    }
+    
+    #profile-header-container span {
+        font-size: 12pt;
+    }
+    
+    #profile-following h2 {
+        margin-top: 1vh;
+    }
+    
+    #following-list .link-to-profile {
+        font-size: 12pt;
+        margin-top: 0.5vh;
     }
     
     .post-meta-container {
@@ -90,6 +107,10 @@ h2 {
     
     #profile-info-container, #profile-following {
         margin: 0;
+    }
+
+    #profile-page {
+        margin-top: 8%;
     }
 
 }

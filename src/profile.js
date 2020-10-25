@@ -36,7 +36,7 @@ export function link_profile(username) {
 //clears the profile page for it to be reused.
 const clear_profile_page = () => {
     const posts = document.getElementById('profile-posts');
-    
+    const following = document.getElementById('following-list');
     //remove previous profiles info
     if(document.getElementById('profile-username').textContent !== ''){
         document.getElementById('followers').remove();
@@ -49,6 +49,11 @@ const clear_profile_page = () => {
     while(posts.hasChildNodes()){
         posts.removeChild(posts.lastChild);
     }
+    
+    while(following.hasChildNodes()){
+        following.removeChild(following.lastChild);
+    }
+    
 }
 
 //set all of the relative tags to display the correct info
@@ -87,7 +92,7 @@ const display_profile_posts = (profile) => {
         .then(data => {
             const tile = createPostTile(data);    
             const post_header = tile.childNodes[0];
-            const edit_button = createElement('span', '\u2630', {class: 'edit-icon'});
+            const edit_button = createElement('span', 'Edit', {class: 'edit-icon'});
             post_header.appendChild(edit_button);
             //if the viewing profile is the current user, the edit button will be visible.
             edit_button.addEventListener('click', () => {

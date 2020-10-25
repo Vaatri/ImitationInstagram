@@ -23,15 +23,15 @@
     /* margin: 3vh 25vw; */
     background-color: white;
     border-color: rgb(199, 199, 199);
+    box-shadow: 3px 2px 24px 4px rgba(0,0,0,0.19);
 }
 
 .like-button {
-    margin-bottom: 15%;
     overflow: hidden;
 }
 
 .liked-button {
-    background-color: red;
+    background-color: rgb(221, 146, 146);
     color: white;
 }
 
@@ -63,7 +63,14 @@
 .edit-icon {
     margin-right: 2%;
     padding: 1%;
-    color: rgb(179, 179, 179);
+    color: rgb(255, 255, 255);
+    background-color:  rgb(111, 127, 221);
+    border-radius: 0.2em;
+    font-size: 0.7em;
+}
+
+.post-meta-data {
+    width: 100%;
 }
 
 .edit-icon:hover {
@@ -101,6 +108,28 @@
     /* color: white; */
 }
 
+.likes-comments-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+}
+
+.likes-comments-container * {
+    margin-top: 0;
+    margin-bottom: 0.5em;
+    font-weight: bold;
+    color: black;
+}
+
+.likes:hover {
+    color: rgb(202, 141, 151);
+}
+.comments:hover {
+    color: rgb(107, 112, 192);
+}
+
+
 .post-image {
     max-width: 30vw;
     object-fit: scale-down;
@@ -110,10 +139,7 @@
     p, span, button  {
         font-size: 13pt;
     }
-    
-    .nav-item {
-        font-size: 7pt;
-    }
+
     
     #settings-icon {
         width: 7%;

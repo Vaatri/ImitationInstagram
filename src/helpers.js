@@ -163,6 +163,17 @@ export function createPostInfo(post) {
     //create container for post meta data
     const post_data = createElement('div', null, {class: 'post-meta-data'})
     post_data_container.appendChild(post_data);
+    //add likes, comments and date
+    const comments = createElement('p', `${post.comments.length} Comments`, {class : 'comments', id: `comments-count-${post.id}`});
+    const likes = createElement('p', `${post.meta.likes.length} Likes`, {class : 'likes', id: `likes-count-${post.id}`});
+    
+    setup_comment_popup(comments, post);
+    setup_likes_popup(likes, post);
+    
+    const likes_comments_container = createElement('div', null, {class:'likes-comments-container'});
+    likes_comments_container.appendChild(likes);
+    likes_comments_container.appendChild(comments);
+    post_data.appendChild(likes_comments_container);
     
     //add author description
     const author_text = createElement('b', `${post.meta.author}`, {class: 'author-desc' , class: 'link-to-profile'});
@@ -170,16 +181,11 @@ export function createPostInfo(post) {
     
     post_data.appendChild(createElement('span', `: ${post.meta.description_text}`, {class: 'desc-text'}));
     
-    //add likes, comments and date
-    const comments = createElement('p', `${post.comments.length} people have commented`, {class : 'comments', id: `comments-count-${post.id}`});
-    const likes = createElement('p', `${post.meta.likes.length} people like this`, {class : 'likes', id: `likes-count-${post.id}`});
     
-    setup_comment_popup(comments, post);
-    setup_likes_popup(likes, post);
-    
-    post_data.appendChild(likes);
-    post_data.appendChild(comments);
-    post_data.appendChild(createElement('p', `Published: ${convert_time(post.meta.published)}`, {class: "published"}));
+    // const likes_comments_container = createElement('div', null, {class:'likes-comments-container'});
+    // likes_comments_container.appendChild(likes);
+    // likes_comments_container.appendChild(comments);
+    post_data.appendChild(createElement('p', `${convert_time(post.meta.published)}`, {class: "published"}));
     
     //add a like button to the post
     const like_button = create_like_button(post.id);
@@ -216,7 +222,7 @@ export const create_comment_input = (id) => {
     return comment_container;
 }
 
-function convert_time(published_time) {
+export function convert_time(published_time) {
     
     var d=new Date(); 
     var now_time = Math.floor(d.getTime()/1000);
@@ -224,16 +230,16 @@ function convert_time(published_time) {
 
     if (seconds > 24*3600) {
         const days = Math.floor(seconds/(24*3600));
-       return `Posted ${days} days ago`;
+       return `Posted ${Math.trunc(days)} days ago`;
     }
 
     if (seconds > 3600) {
         const hours = seconds/3600
-       return `Posted ${hours} hours ago`;
+       return `Posted ${Math.trunc(hours)} hours ago`;
     }
 
     if (seconds > 60) {
-       return Math.floor(seconds/60) + " minutes ago";
+       return `Posted ${Math.trunc(Math.floor(seconds/60))} minutes ago`;
     }
 }
 
