@@ -35,7 +35,6 @@ export function display_post_popup() {
     const image_container = createElement('div', null, {id: 'image-template'});
     popup_content.appendChild(image_container);
     
-    
     let image_src = '';
     
     //add image area and description text area
@@ -84,10 +83,16 @@ export function display_post_popup() {
 
 
 const reset_post = (reset_button) => {
-    const image_container = document.getElementById('image-template')
-    image_container.removeChild(image_container.lastChild);
-    document.getElementById('upload-button').style.display = 'inline-block';
+    
+    const upload = document.getElementById('upload-button');
+    if(upload.value){
+        const image_container = document.getElementById('image-template')
+        image_container.removeChild(image_container.lastChild);
+    }
+    upload.style.display = 'inline-block';
+    upload.value = '';
     reset_button.value = '';
+    document.getElementById('post-description').value = '';
 }
 
 const create_popup_exit = () => {
@@ -302,6 +307,8 @@ export function display_settings_popup() {
     
     popup_content.appendChild(button_container);
     
+    popup_content.appendChild(createElement('p', null, {id:'error-template'}));
+    
     return settings;
 }
 
@@ -320,7 +327,7 @@ const update_profile = () => {
         'name': new_name,
         'password': new_pwd
     }
-    
+    const error_msg = document.getElementById('settings-error-msg');
     //first get users current profile info
     api.get_user()
     .then(profile => {
@@ -337,10 +344,11 @@ const update_profile = () => {
         return api.login_user(username, curr_pwd);
     })
     .then(response => {
+        let error_msg = document.getElementById('error-template');
         if(response.message) {
-            popup_content.appendChild(createElement('span', '*Current Password is incorrect', {class: 'error-msg'}));
+            error_msg.textContent = '*Current Password is incorrect';
         } else if (new_pwd !== verify_pwd) {
-            popup_content.appendChild(createElement('span', '*Passwords do not match', {class: 'error-msg'}));
+            error_msg.textContent = '*Passwords do not match';
         } else {
             localStorage.setItem('user_token', response.token);
             prof_info['password'] = curr_pwd;
@@ -350,14 +358,13 @@ const update_profile = () => {
     })
     .then(flag => {
         if (flag) {
-            console.log(prof_info);
             api.update_profile(prof_info)
             .then(response => {
-                console.log(response);
                 if(response['msg'] !== 'success') {
-                    popup_content.appendChild(createElement('p', `* ${response.message}`, {class: 'error-msg'}));
+                    error_msg.textContent = `*${response.message}`;
                 } else {
                     display_confirmation("Profile updated!");
+                    error_msg.textContent = '';
                 }
             });
         }

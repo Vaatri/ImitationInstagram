@@ -69,6 +69,7 @@ nav_feed.addEventListener('click', () => {
 })
 
 
+//if user refreshes display the feed or if logged out then display user form
 window.onload = () => {
     const token = localStorage.getItem('user_token');
     if(token){
@@ -138,9 +139,10 @@ form.addEventListener('submit', (event) => {
         //otherwise save data in localstorage
         } else {
             const token = response.token;
-            console.log(token);
             localStorage.setItem('user_token', token);
             localStorage.setItem('username', username);
+            set_notifications();
+            // console.log(token);
             display_feed(token);
         }
     });
@@ -166,6 +168,13 @@ const feed = () => {
         const posts = data.posts;
         //using the feed_dom as the initial value, append post tiles to it.
         posts.reduce((parent, post) => {
+            //used for notifications, store the highest id of the post
+            let highest_post = localStorage.getItem('highest_post');
+            if(!highest_post) {
+                localStorage.setItem('highest_post', post.id);
+            } else if (highest_post < post.id) {
+                localStorage.setItem('highest_post', post.id);
+            }
             //createPostTile will handle all of the creation of the post, including buttons, modals, etc.
             const post_content = createPostTile(post)  
             parent.appendChild(post_content);
@@ -179,6 +188,13 @@ const feed = () => {
         //if the user is new, num_posts should still be 0
         if(num_posts === 0) {
             display_suggested_following();
+        } else {
+            if(document.getElementById('suggestions-container')){
+                document.getElementById('suggestions-container').remove(); 
+            }
+            if(document.getElementById('intro')) {
+                document.getElementById('intro').remove();
+            }
         }
     });
 }
@@ -186,7 +202,7 @@ const feed = () => {
 //display some users for a user that just registered and isn't following anyone
 const display_suggested_following = () => {
     //Create a page with a header, and a suggestions box for the user
-    feed_dom.appendChild(createElement('h1', 'Welcome to Quickpic!, here are some suggestions on who to follow!', {style: 'margin: 1em'}));
+    feed_dom.appendChild(createElement('h1', 'Welcome to Quickpic!, here are some suggestions on who to follow!', {style: 'margin: 1em', id: 'intro'}));
     const suggestions_container = createElement('div', null, {id: 'suggestions-container'});
     const suggestion_list = createElement('ul', 'Click on their usernames to view their profiles!', {id: 'suggestion-list'})
     suggestion_list.appendChild(createElement('hr', null, {}));
@@ -303,6 +319,50 @@ document.addEventListener('scroll', () => {
 
 });
 
+
+const check_latest_posts = () => {
+    console.log('hello');
+    api.get_feed(0)
+    .then(feed => {
+        console.log(feed);
+        feed.posts.forEach((post => {
+            if(post.id > localStorage.getItem('highest_post')) {
+                send_notification(post);
+            }
+        }));
+    })
+}
+
+const send_notification = (post) => {
+    
+    if(Notification.permission === "granted") {
+        var notification = new Notification(`${post.author} just posted!`);
+    }
+
+}
+
+
+const set_notifications = () => {
+    
+    api.get_feed(0)
+    .then(feed => {
+        feed.posts.forEach(post => {
+            let highest_post = localStorage.getItem('highest_post');
+            if(!highest_post) {
+                localStorage.setItem('highest_post', post.id);
+            } else if (highest_post < post.id) {
+                localStorage.setItem('highest_post', post.id);
+            }
+        });
+    })
+    .then(() => {    
+        Notification.requestPermission().then(permission => {
+        });
+        // setInterval(() => {check_latest_posts()}, 1000);
+    })
+    
+
+}
 
 
 

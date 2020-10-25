@@ -149,6 +149,12 @@ table {
     text-align: right;
 }
 
+#error-template {
+    color: red;
+    font-size: 0.8em;
+    margin-bottom: 10px;
+    width: 70%;
+}
 
 /* Need to fix popup content on likes/comments */
 @media screen and (max-width: 600px) {
